@@ -44,7 +44,7 @@
 #ifndef _AVR_ILI9341H_
 #define _AVR_ILI9341H_
 
-#include "Adafruit_GFX.h"
+#include "utilities/Adafruit_SPITFT.h"
 #include "Arduino.h"
 #include "Print.h"
 #include <Adafruit_SPITFT.h>
