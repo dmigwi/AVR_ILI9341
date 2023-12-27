@@ -561,14 +561,15 @@ void Adafruit_SPITFT::initSPI(uint32_t freq, uint8_t spiMode) {
     freq = DEFAULT_SPI_FREQ; // If no freq specified, use default
 
   // Init basic control pins common to all connection types
-  if (_cs >= 0) {
-    pinMode(_cs, OUTPUT);
-    // digitalWrite(_cs, LOW); // Deselect
-  }
-  pinMode(_dc, OUTPUT);
-  // digitalWrite(_dc, HIGH); // Data mode
 
-#if defined(COMPATIBILITY_MODE)
+  // if (_cs >= 0) {
+  //   // pinMode(_cs, OUTPUT);
+  //   digitalWrite(_cs, LOW); // Deselect
+  // }
+  // pinMode(_dc, OUTPUT);
+  // // digitalWrite(_dc, HIGH); // Data mode
+
+#if !defined(COMPATIBILITY_MODE)
   dcPort = portOutputRegister(digitalPinToPort(_dc));
   dcMask = digitalPinToBitMask(_dc);
   csPort = portOutputRegister(digitalPinToPort(_cs));
@@ -583,6 +584,7 @@ void Adafruit_SPITFT::initSPI(uint32_t freq, uint8_t spiMode) {
 //   hwspi._mode = spiMode; // Save spiMode value for later
 
 #ifdef COMPATIBILITY_MODE
+  hwspi._spi->begin();
 #if defined(SPI_HAS_TRANSACTION)
   hwspi.settings = SPISettings(freq, MSBFIRST, spiMode);  // 8000000 gives max speed on AVR 16MHz
 #endif
@@ -687,11 +689,11 @@ void Adafruit_SPITFT::initSPI(uint32_t freq, uint8_t spiMode) {
     // Toggle _rst low to reset
     pinMode(_rst, OUTPUT);
     digitalWrite(_rst, HIGH);
-    delay(5);
+    delay(50);
     digitalWrite(_rst, LOW);
-    delay(20);
+    delay(100);
     digitalWrite(_rst, HIGH);
-    delay(150);
+    delay(50);
   }
 
 // #if defined(USE_SPI_DMA) && (defined(__SAMD51__) || defined(ARDUINO_SAMD_ZERO))
@@ -963,6 +965,7 @@ uint8_t Adafruit_SPITFT::writeSPI(uint8_t c) {
     asm volatile("rjmp .+0\n");
     asm volatile("rjmp .+0\n");
     while(!(SPSR & _BV(SPIF)));
+    return SPDR;
 #endif
 }
 
@@ -972,7 +975,7 @@ uint8_t Adafruit_SPITFT::writeSPI(uint8_t c) {
     @param  color  16-bit pixel color in '565' RGB format.
     @param  len    Number of pixels to draw.   
 */
-void Adafruit_SPITFT::writeColor(uint16_t color, uint32_t len){
+void Adafruit_SPITFT::writeColor(uint16_t color, uint32_t len) {
 #ifdef COMPATIBILITY_MODE
   while(len > 0) { 
     hwspi._spi->transfer(color>>8);
@@ -980,8 +983,8 @@ void Adafruit_SPITFT::writeColor(uint16_t color, uint32_t len){
     len--;
   }
 #else
-  asm volatile
-  (
+  // for (SPDR = (len); (!(SPSR & _BV(SPIF)));
+  asm volatile (
   "next:\n"
     "out %[spdr],%[hi]\n"
     "rjmp .+0\n"  // wait 8*2+1 = 17 cycles
@@ -1003,7 +1006,7 @@ void Adafruit_SPITFT::writeColor(uint16_t color, uint32_t len){
     "nop\n"
     "sbiw %[num],1\n"
     "brne next\n"
-    : [num] "+w" (num)
+    : [num] "+w" (len)
     : [spdr] "I" (_SFR_IO_ADDR(SPDR)), [lo] "r" ((uint8_t)color), [hi] "r" ((uint8_t)(color>>8))
   );
 #endif
@@ -1011,7 +1014,7 @@ void Adafruit_SPITFT::writeColor(uint16_t color, uint32_t len){
 
 // ----------------------------------------------------------
 // fast method to send multiple 16-bit values from RAM via SPI
-inline void Adafruit_SPITFT::copyImg(uint8_t *img, uint16_t num){
+inline void Adafruit_SPITFT::copyImg(uint8_t *img, uint16_t num) {
 #ifdef COMPATIBILITY_MODE
   while(num > 0) { 
     hwspi._spi->transfer(*(img+1)); 
@@ -1051,18 +1054,18 @@ inline void Adafruit_SPITFT::copyImg(uint8_t *img, uint16_t num){
 #endif
 } 
 
-/*!
-    @brief  Allow changing the SPI clock speed after initialization
-    @param  freq Desired frequency of SPI clock, may not be the
-    end frequency you get based on what the chip can do!
-*/
-void Adafruit_SPITFT::setSPISpeed(uint32_t freq) {
-#if defined(SPI_HAS_TRANSACTION)
-  hwspi.settings = SPISettings(freq, MSBFIRST, hwspi._mode);
-#else
-  hwspi._freq = freq; // Save freq value for later
-#endif
-}
+// /*!
+//     @brief  Allow changing the SPI clock speed after initialization
+//     @param  freq Desired frequency of SPI clock, may not be the
+//     end frequency you get based on what the chip can do!
+// */
+// void Adafruit_SPITFT::setSPISpeed(uint32_t freq) {
+// #if defined(SPI_HAS_TRANSACTION)
+//   hwspi.settings = SPISettings(freq, MSBFIRST, hwspi._mode);
+// #else
+//   hwspi._freq = freq; // Save freq value for later
+// #endif
+// }
 /*!
     @brief Enables the command to be run, to gain exclusive access to the SPI bus.
 */
@@ -1886,6 +1889,9 @@ inline void Adafruit_SPITFT::writeFillRectPreclipped(int16_t x, int16_t y,
                                                      uint16_t color) {
   setAddrWindow(x, y, w, h);
   writeColor(color, (uint32_t)w * h);
+
+  CS_IDLE();
+  SPI_END();
 }
 
 
@@ -2157,26 +2163,39 @@ uint16_t Adafruit_SPITFT::color565(uint8_t red, uint8_t green, uint8_t blue) {
 }
 
 /*!
-      @brief   Handles the complete sending of commands and data.
-      @param   cmd  The Command Byte
+      @brief  Handles the complete sending of 8-bit commands and data chunks.
+              It does not initiate or close the SPI communication session. This 
+              should be managed by its' caller. This is done to increase its
+              efficiency on cases when multiple simultaneous calls need to be executed.
+      @param   cmd  The command byte
       @param   dataBytes  A pointer to the Data bytes to send
       @param   numBytes  The number of bytes we should send
 */
-void Adafruit_SPITFT::sendCommand(uint8_t cmd, uint8_t *dataBytes, uint8_t numBytes) {
-  CS_ACTIVE();
-  SPI_START();
-
+void Adafruit_SPITFT::sendCommand(uint8_t cmd, const uint8_t *dataBytes, uint8_t numBytes) {
   DC_COMMAND();   // Set Command input mode.
   writeSPI(cmd);  // Execute the command input.
 
   DC_DATA();  // Set Command input mode.
 
   for (uint8_t i = 0; i < numBytes; i++) {
-    writeSPI(pgm_read_byte(dataBytes+i)); // Send the data bytes
+    writeSPI(pgm_read_byte(dataBytes++)); // Send the data bytes
   }
+}
 
-  CS_IDLE();
-  SPI_END();
+/*!
+    @brief   Read 8 bits of data from display configuration memory (not RAM).
+            It does not initiate or close the SPI communication session. This
+            should be managed by its' caller. This is done to increase its 
+            efficiency on cases when multiple simultaneous calls need to be executed.
+            This is highly undocumented/supported and should be avoided,
+            function is only included because some of the examples use it.
+    @param   commandByte The command register to read data from.
+    @return  Unsigned 8-bit data read from display register.
+ */
+uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte) {
+  DC_DATA(); // Data Mode
+
+  return writeSPI(commandByte);
 }
 
 // /*!
@@ -2246,24 +2265,7 @@ void Adafruit_SPITFT::sendCommand(uint8_t cmd, uint8_t *dataBytes, uint8_t numBy
 //   SPI_END_TRANSACTION();
 // }
 
-/*!
-    @brief   Read 8 bits of data from display configuration memory (not RAM).
-              This is highly undocumented/supported and should be avoided,
-              function is only included because some of the examples use it.
-    @param   commandByte The command register to read data from.
-    @return  Unsigned 8-bit data read from display register.
- */
-uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte) {
-  CS_ACTIVE();
-  SPI_START();
-  DC_DATA(); // Data Mode
 
-  uint8_t result = writeSPI(commandByte);
-
-  CS_IDLE();
-  SPI_END();
-  return result;
-}
 
 // /*!
 //  @brief   Read 16 bits of data from display register.

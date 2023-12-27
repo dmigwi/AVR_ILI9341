@@ -124,17 +124,26 @@ void AVR_ILI9341::begin(uint32_t freq) {
 //     delay(150);
 //   }
 
+  SPI_START();
+  CS_ACTIVE();
+
   uint8_t cmd, x, numArgs;
   const uint8_t *addr = initcmd;
 
   while ((cmd = pgm_read_byte(addr++)) > 0) {
     x = pgm_read_byte(addr++);
     numArgs = x & 0x7F;
-    sendCommand(cmd, (uint8_t *)addr, numArgs);
+    sendCommand(cmd, addr, numArgs);
     addr += numArgs;
     if (x & 0x80)
       delay(150);
   }
+
+  // Trigger Horizontal rotation.
+  AVR_ILI9341::setRotation(0);
+
+  CS_IDLE();
+  SPI_END();
 
   _width = ILI9341_TFTWIDTH;
   _height = ILI9341_TFTHEIGHT;
@@ -171,7 +180,13 @@ void AVR_ILI9341::setRotation(uint8_t m) {
     break;
   }
 
+  SPI_START();
+  CS_ACTIVE();
+
   sendCommand(ILI9341_MADCTL, &m, 1);
+
+  CS_IDLE();
+  SPI_END();
 }
 
 /**************************************************************************/
@@ -194,7 +209,14 @@ void AVR_ILI9341::scrollTo(uint16_t y) {
   uint8_t data[2];
   data[0] = y >> 8;
   data[1] = y & 0xff;
-  sendCommand(ILI9341_VSCRSADD, (uint8_t *)data, 2);
+
+  SPI_START();
+  CS_ACTIVE();
+
+  sendCommand(ILI9341_VSCRSADD, data, 2);
+
+  CS_IDLE();
+  SPI_END();
 }
 
 /**************************************************************************/
@@ -215,7 +237,14 @@ void AVR_ILI9341::setScrollMargins(uint16_t top, uint16_t bottom) {
     data[3] = middle & 0xff;
     data[4] = bottom >> 8;
     data[5] = bottom & 0xff;
-    sendCommand(ILI9341_VSCRDEF, (uint8_t *)data, 6);
+
+    SPI_START();
+    CS_ACTIVE();
+
+    sendCommand(ILI9341_VSCRDEF, data, 6);
+
+    CS_IDLE();
+    SPI_END();
   }
 }
 
@@ -231,8 +260,8 @@ void AVR_ILI9341::setScrollMargins(uint16_t top, uint16_t bottom) {
 */
 /**************************************************************************/
 void AVR_ILI9341::setAddrWindow(int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
-    AVR_ILI9341::Adafruit_SPITFT::CS_ACTIVE();
-    AVR_ILI9341::Adafruit_SPITFT::SPI_START();
+    SPI_START();
+    CS_ACTIVE();
 
     x1 = min(x1, _width-1); // Convert unsigned in to signed.
     x2 = min(x2, _width-1);
@@ -263,7 +292,14 @@ void AVR_ILI9341::setAddrWindow(int16_t x1, int16_t y1, int16_t x2, int16_t y2) 
  */
 /**************************************************************************/
 uint8_t AVR_ILI9341::readcommand(uint8_t commandByte, uint8_t index) {
+  SPI_START();
+  CS_ACTIVE();
+
   uint8_t data = 0x10 + index;
-  AVR_ILI9341::Adafruit_SPITFT::sendCommand((uint8_t)0xD9, &data, (uint8_t)1); // Set Index Register
-  return AVR_ILI9341::Adafruit_SPITFT::readcommand8(commandByte);
+  sendCommand((uint8_t)0xD9, &data, (uint8_t)1); // Set Index Register
+  uint8_t result = readcommand8(commandByte);
+
+  CS_IDLE();
+  SPI_END();
+  return result;
 }

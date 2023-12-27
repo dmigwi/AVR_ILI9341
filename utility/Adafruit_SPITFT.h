@@ -168,53 +168,53 @@ public:
 
   // These first two functions MUST be declared by subclasses:
 
-  /*!
-      @brief  Display-specific initialization function.
-      @param  freq  SPI frequency, in hz (or 0 for default or unused).
-  */
-  virtual void begin(uint32_t freq) = 0;
+  // /*!
+  //     @brief  Display-specific initialization function.
+  //     @param  freq  SPI frequency, in hz (or 0 for default or unused).
+  // */
+  // virtual void begin(uint32_t freq) = 0;
 
-  /*!
-      @brief  Set up the specific display hardware's "address window"
-              for subsequent pixel-pushing operations.
-      @param  x  Leftmost pixel of area to be drawn (MUST be within
-                 display bounds at current rotation setting).
-      @param  y  Topmost pixel of area to be drawn (MUST be within
-                 display bounds at current rotation setting).
-      @param  w  Width of area to be drawn, in pixels (MUST be >0 and,
-                 added to x, within display bounds at current rotation).
-      @param  h  Height of area to be drawn, in pixels (MUST be >0 and,
-                 added to x, within display bounds at current rotation).
-  */
-  virtual void setAddrWindow(int16_t x, int16_t y, int16_t w, int16_t h) = 0;
+  // /*!
+  //     @brief  Set up the specific display hardware's "address window"
+  //             for subsequent pixel-pushing operations.
+  //     @param  x  Leftmost pixel of area to be drawn (MUST be within
+  //                display bounds at current rotation setting).
+  //     @param  y  Topmost pixel of area to be drawn (MUST be within
+  //                display bounds at current rotation setting).
+  //     @param  w  Width of area to be drawn, in pixels (MUST be >0 and,
+  //                added to x, within display bounds at current rotation).
+  //     @param  h  Height of area to be drawn, in pixels (MUST be >0 and,
+  //                added to x, within display bounds at current rotation).
+  // */
+  // virtual void setAddrWindow(int16_t x, int16_t y, int16_t w, int16_t h) = 0;
 
   // Remaining functions do not need to be declared in subclasses
   // unless they wish to provide hardware-specific optimizations.
   // Brief comments here...documented more thoroughly in .cpp file.
 
-  // Subclass' begin() function invokes this to initialize hardware.
-  // freq=0 to use default SPI speed. spiMode must be one of the SPI_MODEn
-  // values defined in SPI.h, which are NOT the same as 0 for SPI_MODE0,
-  // 1 for SPI_MODE1, etc...use ONLY the SPI_MODEn defines! Only!
-  // Name is outdated (interface may be parallel) but for compatibility:
-  void initSPI(uint32_t freq = 0, uint8_t spiMode = SPI_MODE0);
-  void setSPISpeed(uint32_t freq);
-  // Chip select and/or hardware SPI transaction start as needed:
-  void SPI_START();
-  // Chip deselect and/or hardware SPI transaction end as needed:
-  void SPI_END();
-  void sendCommand(uint8_t commandByte, uint8_t *dataBytes, uint8_t numDataBytes);
-  // void sendCommand(uint8_t commandByte, const uint8_t *dataBytes = NULL,
-  //                  uint8_t numDataBytes = 0);
-  // void sendCommand16(uint16_t commandWord, const uint8_t *dataBytes = NULL,
-  //                    uint8_t numDataBytes = 0);
-  uint8_t readcommand8(uint8_t commandByte);
-  // uint16_t readcommand16(uint16_t addr);
+  // // Subclass' begin() function invokes this to initialize hardware.
+  // // freq=0 to use default SPI speed. spiMode must be one of the SPI_MODEn
+  // // values defined in SPI.h, which are NOT the same as 0 for SPI_MODE0,
+  // // 1 for SPI_MODE1, etc...use ONLY the SPI_MODEn defines! Only!
+  // // Name is outdated (interface may be parallel) but for compatibility:
+  // void initSPI(uint32_t freq = 0, uint8_t spiMode = SPI_MODE0);
+  // void setSPISpeed(uint32_t freq);
+  // // Chip select and/or hardware SPI transaction start as needed:
+  // void SPI_START();
+  // // Chip deselect and/or hardware SPI transaction end as needed:
+  // void SPI_END();
+  // void sendCommand(uint8_t commandByte, uint8_t *dataBytes, uint8_t numDataBytes);
+  // // void sendCommand(uint8_t commandByte, const uint8_t *dataBytes = NULL,
+  // //                  uint8_t numDataBytes = 0);
+  // // void sendCommand16(uint16_t commandWord, const uint8_t *dataBytes = NULL,
+  // //                    uint8_t numDataBytes = 0);
+  // uint8_t readcommand8(uint8_t commandByte);
+  // // uint16_t readcommand16(uint16_t addr);
 
-  void DC_DATA();
-  void DC_COMMAND();
-  void CS_IDLE();
-  void CS_ACTIVE();
+  // void DC_DATA();
+  // void DC_COMMAND();
+  // void CS_IDLE();
+  // void CS_ACTIVE();
   
   // These functions require a chip-select and/or SPI transaction
   // around them. Higher-level graphics primitives might start a
@@ -251,7 +251,7 @@ public:
   // higher-level primitives (which should use the functions above).
   // void drawPixel(int16_t x, int16_t y, uint16_t color);
   void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
-  void fillScreen(uint16_t color);
+  // void fillScreen(uint16_t color);
   // void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
   // void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
   // A single-pixel push encapsulated in a transaction. I don't think
@@ -266,8 +266,8 @@ public:
   // using Adafruit_GFX::fillCircle;
   // void fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
 
-  // using Adafruit_GFX::fillScreen;
-  // void fillScreen(uint16_t color);
+  using Adafruit_GFX::fillScreen;
+  void fillScreen(uint16_t color);
 
   void invertDisplay(bool i);
   uint16_t color565(uint8_t r, uint8_t g, uint8_t b);
@@ -298,13 +298,6 @@ public:
 
   // Placing these functions entirely in the class definition inlines
   // them implicitly them while allowing their use in other code:
-
-// CommandInfo defines the data to be accepted by the sendCommand as a parameter.
-  struct commandInfo { 
-    uint8_t cmd; // command to run.
-    uint8_t counts; // count of the data elements;
-    uint8_t *data; // Pointer to the first element in the array.
-  };
 
   // /*!
   //     @brief  Set the chip-select line HIGH. Does NOT check whether CS pin
@@ -405,11 +398,54 @@ public:
   // declared inline here and the code is in the .cpp file, since outside
   // code doesn't need to see these.
 
+
+protected:
+  /*!
+      @brief  Display-specific initialization function.
+      @param  freq  SPI frequency, in hz (or 0 for default or unused).
+  */
+  virtual void begin(uint32_t freq) = 0;
+
+  /*!
+      @brief  Set up the specific display hardware's "address window"
+              for subsequent pixel-pushing operations.
+      @param  x  Leftmost pixel of area to be drawn (MUST be within
+                 display bounds at current rotation setting).
+      @param  y  Topmost pixel of area to be drawn (MUST be within
+                 display bounds at current rotation setting).
+      @param  w  Width of area to be drawn, in pixels (MUST be >0 and,
+                 added to x, within display bounds at current rotation).
+      @param  h  Height of area to be drawn, in pixels (MUST be >0 and,
+                 added to x, within display bounds at current rotation).
+  */
+  virtual void setAddrWindow(int16_t x, int16_t y, int16_t w, int16_t h) = 0;
+  
+   // Subclass' begin() function invokes this to initialize hardware.
+  // freq=0 to use default SPI speed. spiMode must be one of the SPI_MODEn
+  // values defined in SPI.h, which are NOT the same as 0 for SPI_MODE0,
+  // 1 for SPI_MODE1, etc...use ONLY the SPI_MODEn defines! Only!
+  // Name is outdated (interface may be parallel) but for compatibility:
+  void initSPI(uint32_t freq = 0, uint8_t spiMode = SPI_MODE0);
+  void setSPISpeed(uint32_t freq);
+  // Chip select and/or hardware SPI transaction start as needed:
+  void SPI_START();
+  // Chip deselect and/or hardware SPI transaction end as needed:
+  void SPI_END();
+  void sendCommand(uint8_t cmd, const uint8_t *dataBytes, uint8_t numBytes);
+  // void sendCommand(uint8_t commandByte, const uint8_t *dataBytes = NULL,
+  //                  uint8_t numDataBytes = 0);
+  // void sendCommand16(uint16_t commandWord, const uint8_t *dataBytes = NULL,
+  //                    uint8_t numDataBytes = 0);
+  uint8_t readcommand8(uint8_t commandByte);
+  // uint16_t readcommand16(uint16_t addr);
+
   // Does the actual writing 8-bit DATA/COMMAND and returns an output if any exists.
   uint8_t writeSPI(uint8_t c);
 
-protected:
-
+  void DC_DATA();
+  void DC_COMMAND();
+  void CS_IDLE();
+  void CS_ACTIVE();
   // inline void SPI_MOSI_HIGH(void);
   // inline void SPI_MOSI_LOW(void);
   // inline void SPI_SCK_HIGH(void);
@@ -445,8 +481,10 @@ protected:
 #endif
     struct {          //   Values specific to HARDWARE SPI:
       SPIClass *_spi; ///< SPI class pointer
+#ifdef COMPATIBILITY_MODE
 #if defined(SPI_HAS_TRANSACTION)
       SPISettings settings; ///< SPI transaction settings
+#endif
 #else
       uint32_t _freq; ///< SPI bitrate (if no SPI transactions)
 #endif
