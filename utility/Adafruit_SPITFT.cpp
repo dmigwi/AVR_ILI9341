@@ -1066,7 +1066,7 @@ void Adafruit_SPITFT::setSPISpeed(uint32_t freq) {
 /*!
     @brief Enables the command to be run, to gain exclusive access to the SPI bus.
 */
-void Adafruit_SPITFT::SPI_START(void) {
+void Adafruit_SPITFT::SPI_START() {
 #if defined(COMPATIBILITY_MODE)
   hwspi._spi->beginTransaction(hwspi.settings);
 #endif
@@ -1075,7 +1075,7 @@ void Adafruit_SPITFT::SPI_START(void) {
 /*!
     @brief Releases the access to the SPI bus for others to use.
 */
-void Adafruit_SPITFT::SPI_END(void) {
+void Adafruit_SPITFT::SPI_END() {
 #if defined(COMPATIBILITY_MODE)
   hwspi._spi->endTransaction();
 #endif
@@ -1084,7 +1084,7 @@ void Adafruit_SPITFT::SPI_END(void) {
 /*!
     @brief  Sets the data/command line HIGH (data mode).
 */
-void Adafruit_SPITFT::DC_DATA(void) {
+void Adafruit_SPITFT::DC_DATA() {
 #if defined(COMPATIBILITY_MODE)
   digitalWrite(_dc, HIGH);
 #else
@@ -1095,7 +1095,7 @@ void Adafruit_SPITFT::DC_DATA(void) {
 /*!
       @brief  Sets the data/command line LOW (command mode).
 */
-void Adafruit_SPITFT::DC_COMMAND(void) {
+void Adafruit_SPITFT::DC_COMMAND() {
 #if defined(COMPATIBILITY_MODE)
   digitalWrite(_dc, LOW);
 #else
@@ -1109,7 +1109,7 @@ void Adafruit_SPITFT::DC_COMMAND(void) {
               Despite function name, this is used even if the display
               connection is parallel.
   */
-void Adafruit_SPITFT::CS_IDLE(void) {
+void Adafruit_SPITFT::CS_IDLE() {
 #if defined(COMPATIBILITY_MODE)
   digitalWrite(_cs, HIGH);
 #else
@@ -1123,7 +1123,7 @@ void Adafruit_SPITFT::CS_IDLE(void) {
               Despite function name, this is used even if the display
               connection is parallel.
   */
-void Adafruit_SPITFT::CS_ACTIVE(void) {
+void Adafruit_SPITFT::CS_ACTIVE() {
 #if defined(COMPATIBILITY_MODE)
   digitalWrite(_cs, LOW);
 #else

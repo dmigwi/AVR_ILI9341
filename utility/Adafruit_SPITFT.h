@@ -162,7 +162,7 @@ public:
 
   // DESTRUCTOR ----------------------------------------------------------
 
-  ~Adafruit_SPITFT(){};
+ virtual ~Adafruit_SPITFT(){};
 
   // CLASS MEMBER FUNCTIONS ----------------------------------------------
 

@@ -48,8 +48,6 @@
 // #include "wiring_private.h"
 // #endif
 // #endif
-#include <Adafruit_I2CDevice.h>
-#include <Adafruit_SPIDevice.h>
 #include <limits.h>
 
 #if defined(ARDUINO_ARCH_AVR)
@@ -233,8 +231,8 @@ void AVR_ILI9341::setScrollMargins(uint16_t top, uint16_t bottom) {
 */
 /**************************************************************************/
 void AVR_ILI9341::setAddrWindow(int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
-    Adafruit_SPITFT::CS_ACTIVE();
-    SPI_START();
+    AVR_ILI9341::Adafruit_SPITFT::CS_ACTIVE();
+    AVR_ILI9341::Adafruit_SPITFT::SPI_START();
 
     x1 = min(x1, _width-1); // Convert unsigned in to signed.
     x2 = min(x2, _width-1);
@@ -266,6 +264,6 @@ void AVR_ILI9341::setAddrWindow(int16_t x1, int16_t y1, int16_t x2, int16_t y2) 
 /**************************************************************************/
 uint8_t AVR_ILI9341::readcommand(uint8_t commandByte, uint8_t index) {
   uint8_t data = 0x10 + index;
-  sendCommand((uint8_t)0xD9, &data, (uint8_t)1); // Set Index Register
-  return readcommand8(commandByte);
+  AVR_ILI9341::Adafruit_SPITFT::sendCommand((uint8_t)0xD9, &data, (uint8_t)1); // Set Index Register
+  return AVR_ILI9341::Adafruit_SPITFT::readcommand8(commandByte);
 }

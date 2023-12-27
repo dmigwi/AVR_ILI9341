@@ -33,8 +33,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "Adafruit_GFX.h"
 #include "glcdfont.c"
-#ifdef __AVR__
- #include <avr/pgmspace.h>
+#ifdef ARDUINO_ARCH_AVR
+#include <avr/pgmspace.h>
 #else
  #define pgm_read_byte(addr) (*(const unsigned char *)(addr))
 #endif

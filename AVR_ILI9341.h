@@ -44,11 +44,12 @@
 #ifndef _AVR_ILI9341H_
 #define _AVR_ILI9341H_
 
-#include "Arduino.h"
 #include "Print.h"
 #include <SPI.h>
-#include "utilities/Adafruit_GFX.h"
-#include "utilities/Adafruit_SPITFT.h"
+#include <Adafruit_I2CDevice.h>
+#include <Adafruit_SPIDevice.h>
+#include "utility/Adafruit_GFX.h"
+#include "utility/Adafruit_SPITFT.h"
 
 #define ILI9341_TFTWIDTH 240  ///< ILI9341 max TFT width
 #define ILI9341_TFTHEIGHT 320 ///< ILI9341 max TFT height
@@ -154,6 +155,8 @@ work with ILI9340)
 class AVR_ILI9341 : public Adafruit_SPITFT {
 public:
   AVR_ILI9341(int8_t _CS, int8_t _DC, int8_t _RST = -1);
+
+  virtual ~AVR_ILI9341(){};
 
   void begin(uint32_t freq = 0);
   void setRotation(uint8_t r);
