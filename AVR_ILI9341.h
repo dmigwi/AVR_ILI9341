@@ -44,11 +44,11 @@
 #ifndef _AVR_ILI9341H_
 #define _AVR_ILI9341H_
 
-#include "utilities/Adafruit_SPITFT.h"
 #include "Arduino.h"
 #include "Print.h"
-#include <Adafruit_SPITFT.h>
 #include <SPI.h>
+// #include "utilities/Adafruit_GFX.h"
+#include "utilities/Adafruit_SPITFT.h"
 
 #define ILI9341_TFTWIDTH 240  ///< ILI9341 max TFT width
 #define ILI9341_TFTHEIGHT 320 ///< ILI9341 max TFT height
@@ -101,6 +101,8 @@
 #define ILI9341_PWCTR5 0xC4 ///< Power Control 5
 #define ILI9341_VMCTR1 0xC5 ///< VCOM Control 1
 #define ILI9341_VMCTR2 0xC7 ///< VCOM Control 2
+#define ILI9341_PWCTRA 0xCB ///< Power Control A
+#define ILI9341_CMD_CF 0xCF ///< Power Control B
 
 #define ILI9341_RDID1 0xDA ///< Read ID 1
 #define ILI9341_RDID2 0xDB ///< Read ID 2
@@ -109,6 +111,16 @@
 
 #define ILI9341_GMCTRP1 0xE0 ///< Positive Gamma Correction
 #define ILI9341_GMCTRN1 0xE1 ///< Negative Gamma Correction
+#define ILI9341_TIMCTRA 0xE8 ///< Driver timing control A
+#define ILI9341_TIMCTRB 0xE9 ///< Driver timing control B
+#define ILI9341_TIMCTRC 0xEA  ///< Driver timing control C
+#define ILI9341_POWSEQ 0xED  ///< Power on sequence control
+#define ILI9341_CMD_EF 0xEF ///< Final LCD column pointer
+
+#define ILI9341_EN3GAM  0xF2 ///< Enable 3G
+#define ILI9341_PUMPRAT 0xF7 ///< Pump ratio control
+
+#define CMD_DELAY   0x80
 //#define ILI9341_PWCTR6     0xFC
 
 // Color definitions
