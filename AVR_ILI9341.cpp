@@ -183,7 +183,7 @@ void AVR_ILI9341::setRotation(uint8_t m) {
 */
 /**************************************************************************/
 void AVR_ILI9341::invertDisplay(bool invert) {
-  invertDisplay(invert);
+  Adafruit_SPITFT::invertDisplay(invert);
 }
 
 /**************************************************************************/
@@ -232,8 +232,8 @@ void AVR_ILI9341::setScrollMargins(uint16_t top, uint16_t bottom) {
     @param   y1  TFT memory 'y' axis end point.
 */
 /**************************************************************************/
-void AVR_ILI9341::setAddrWindow(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
-    CS_ACTIVE();
+void AVR_ILI9341::setAddrWindow(int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
+    Adafruit_SPITFT::CS_ACTIVE();
     SPI_START();
 
     x1 = min(x1, _width-1); // Convert unsigned in to signed.
@@ -256,7 +256,7 @@ void AVR_ILI9341::setAddrWindow(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t 
 
 /**************************************************************************/
 /*!
-    @brief  Read 8 bits of data from ILI9341 configuration memory. NOT from RAM!
+    @brief  Reads 8 bits of data from ILI9341 configuration memory. NOT from RAM!
             This is highly undocumented/supported, it's really a hack but kinda
    works?
     @param    commandByte  The command register to read data from
@@ -264,8 +264,8 @@ void AVR_ILI9341::setAddrWindow(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t 
     @return   Unsigned 8-bit data read from ILI9341 register
  */
 /**************************************************************************/
-uint8_t AVR_ILI9341::readcommand8(uint8_t commandByte, uint8_t index) {
+uint8_t AVR_ILI9341::readcommand(uint8_t commandByte, uint8_t index) {
   uint8_t data = 0x10 + index;
-  sendCommand(0xD9, &data, 1); // Set Index Register
-  return Adafruit_SPITFT::readcommand8(commandByte);
+  sendCommand((uint8_t)0xD9, &data, (uint8_t)1); // Set Index Register
+  return readcommand8(commandByte);
 }

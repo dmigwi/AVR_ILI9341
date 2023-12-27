@@ -27,7 +27,7 @@
 // if defined - the library should work on all Arduino compatible boards
 #define COMPATIBILITY_MODE
 
-// #include "Adafruit_GFX.h"
+#include "Adafruit_GFX.h"
 #include <SPI.h>
 #include <Print.h>
 
@@ -123,7 +123,7 @@ typedef volatile ADAGFX_PORT_t *PORTreg_t; ///< PORT register type
           again to avoid breaking a lot of other code. If in doubt, read
           the comments.
 */
-class Adafruit_SPITFT /*: public Adafruit_GFX*/ {
+class Adafruit_SPITFT : public Adafruit_GFX {
 
 public:
   // CONSTRUCTORS --------------------------------------------------------
@@ -141,8 +141,7 @@ public:
   // optional reset pin. cs is required but can be -1 if unused -- rather
   // than moving it to the optional arguments, it was done this way to
   // avoid breaking existing code (-1 option was a later addition).
-  Adafruit_SPITFT(uint16_t w, uint16_t h, int8_t cs, int8_t dc,
-                  int8_t rst = -1);
+  Adafruit_SPITFT(uint16_t w, uint16_t h, int8_t cs, int8_t dc, int8_t rst = -1);
 
 // #if !defined(ESP8266) // See notes in .cpp
 //   // Hardware SPI constructor using an arbitrary SPI peripheral: expects
@@ -187,7 +186,7 @@ public:
       @param  h  Height of area to be drawn, in pixels (MUST be >0 and,
                  added to x, within display bounds at current rotation).
   */
-  virtual void setAddrWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h) = 0;
+  virtual void setAddrWindow(int16_t x, int16_t y, int16_t w, int16_t h) = 0;
 
   // Remaining functions do not need to be declared in subclasses
   // unless they wish to provide hardware-specific optimizations.
@@ -201,16 +200,16 @@ public:
   void initSPI(uint32_t freq = 0, uint8_t spiMode = SPI_MODE0);
   void setSPISpeed(uint32_t freq);
   // Chip select and/or hardware SPI transaction start as needed:
-  void SPI_START(void);
+  void SPI_START();
   // Chip deselect and/or hardware SPI transaction end as needed:
-  void SPI_END(void);
+  void SPI_END();
   void sendCommand(uint8_t commandByte, uint8_t *dataBytes, uint8_t numDataBytes);
   // void sendCommand(uint8_t commandByte, const uint8_t *dataBytes = NULL,
   //                  uint8_t numDataBytes = 0);
   // void sendCommand16(uint16_t commandWord, const uint8_t *dataBytes = NULL,
   //                    uint8_t numDataBytes = 0);
-  uint8_t readcommand8(uint8_t commandByte, uint8_t index = 0);
-  uint16_t readcommand16(uint16_t addr);
+  uint8_t readcommand8(uint8_t commandByte);
+  // uint16_t readcommand16(uint16_t addr);
 
   void DC_DATA();
   void DC_COMMAND();
@@ -223,14 +222,14 @@ public:
   // (e.g. circle or text rendering might make repeated lines or rects)
   // before ending the transaction. It's more efficient than starting a
   // transaction every time.
-  void writePixel(int16_t x, int16_t y, uint16_t color);
-  void writePixels(uint16_t *colors, uint32_t len, bool block = true,
-                   bool bigEndian = false);
+  void drawPixel(int16_t x, int16_t y, uint16_t color);
+  // void drawPixels(uint16_t *colors, uint32_t len, bool block = true,
+  //                  bool bigEndian = false);
   void writeColor(uint16_t color, uint32_t len);
   void writeFillRect(int16_t x, int16_t y, int16_t w, int16_t h,
                      uint16_t color);
-  void writeFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
-  void writeFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
+  void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
+  void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
   // This is a new function, similar to writeFillRect() except that
   // all arguments MUST be onscreen, sorted and clipped. If higher-level
   // primitives can handle their own sorting/clipping, it avoids repeating
@@ -239,9 +238,9 @@ public:
   inline void writeFillRectPreclipped(int16_t x, int16_t y, int16_t w,
                                       int16_t h, uint16_t color);
   // Another new function, companion to the new non-blocking
-  // // writePixels() variant.
+  // // drawPixels() variant.
   // void dmaWait(void);
-  // // Used by writePixels() in some situations, but might have rare need in
+  // // Used by drawPixels() in some situations, but might have rare need in
   // // user code, so it's public...
   // bool dmaBusy(void) const; // true if DMA is used and busy, false otherwise
   // void swapBytes(uint16_t *src, uint32_t len, uint16_t *dest = NULL);
@@ -560,9 +559,9 @@ protected:
   int8_t _cs;              ///< Chip select pin # (or -1)
   int8_t _dc;              ///< Data/command pin #
 
-  uint16_t _width;       ///< Display width as modified by current rotation
-  uint16_t _height;      ///< Display height as modified by current rotation
-  uint8_t rotation;     ///< Display rotation (0 thru 3)
+  // uint16_t _width;       ///< Display width as modified by current rotation
+  // uint16_t _height;      ///< Display height as modified by current rotation
+  // uint8_t rotation;     ///< Display rotation (0 thru 3)
 
   uint8_t  csMask, dcMask;
   volatile uint8_t  *csPort, *dcPort;

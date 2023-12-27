@@ -47,7 +47,7 @@
 #include "Arduino.h"
 #include "Print.h"
 #include <SPI.h>
-// #include "utilities/Adafruit_GFX.h"
+#include "utilities/Adafruit_GFX.h"
 #include "utilities/Adafruit_SPITFT.h"
 
 #define ILI9341_TFTWIDTH 240  ///< ILI9341 max TFT width
@@ -162,9 +162,10 @@ public:
   void setScrollMargins(uint16_t top, uint16_t bottom);
 
   // Transaction API not used by GFX
-  void setAddrWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+  void setAddrWindow(int16_t x, int16_t y, int16_t w, int16_t h);
 
-  uint8_t readcommand8(uint8_t reg, uint8_t index = 0);
+  uint8_t readcommand(uint8_t reg, uint8_t index = 0);
+
 };
 
 #endif // _AVR_ILI9341H_

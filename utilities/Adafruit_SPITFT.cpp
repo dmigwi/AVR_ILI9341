@@ -303,8 +303,7 @@ static const struct {
              begin or init function. Unfortunate but unavoidable.
 */
 Adafruit_SPITFT::Adafruit_SPITFT(uint16_t w, uint16_t h, int8_t cs, int8_t dc, int8_t rst)
-    // : Adafruit_GFX(w, h) 
-    {
+    :Adafruit_GFX(w, h) {
   connection = TFT_HARD_SPI;
   _rst = rst;
   _cs = cs;
@@ -1067,7 +1066,7 @@ void Adafruit_SPITFT::setSPISpeed(uint32_t freq) {
 /*!
     @brief Enables the command to be run, to gain exclusive access to the SPI bus.
 */
-void Adafruit_SPITFT::SPI_START() {
+void Adafruit_SPITFT::SPI_START(void) {
 #if defined(COMPATIBILITY_MODE)
   hwspi._spi->beginTransaction(hwspi.settings);
 #endif
@@ -1076,7 +1075,7 @@ void Adafruit_SPITFT::SPI_START() {
 /*!
     @brief Releases the access to the SPI bus for others to use.
 */
-void Adafruit_SPITFT::SPI_END() {
+void Adafruit_SPITFT::SPI_END(void) {
 #if defined(COMPATIBILITY_MODE)
   hwspi._spi->endTransaction();
 #endif
@@ -1085,7 +1084,7 @@ void Adafruit_SPITFT::SPI_END() {
 /*!
     @brief  Sets the data/command line HIGH (data mode).
 */
-void Adafruit_SPITFT::DC_DATA() {
+void Adafruit_SPITFT::DC_DATA(void) {
 #if defined(COMPATIBILITY_MODE)
   digitalWrite(_dc, HIGH);
 #else
@@ -1096,7 +1095,7 @@ void Adafruit_SPITFT::DC_DATA() {
 /*!
       @brief  Sets the data/command line LOW (command mode).
 */
-void Adafruit_SPITFT::DC_COMMAND() {
+void Adafruit_SPITFT::DC_COMMAND(void) {
 #if defined(COMPATIBILITY_MODE)
   digitalWrite(_dc, LOW);
 #else
@@ -1110,7 +1109,7 @@ void Adafruit_SPITFT::DC_COMMAND() {
               Despite function name, this is used even if the display
               connection is parallel.
   */
-void Adafruit_SPITFT::CS_IDLE() {
+void Adafruit_SPITFT::CS_IDLE(void) {
 #if defined(COMPATIBILITY_MODE)
   digitalWrite(_cs, HIGH);
 #else
@@ -1124,7 +1123,7 @@ void Adafruit_SPITFT::CS_IDLE() {
               Despite function name, this is used even if the display
               connection is parallel.
   */
-void Adafruit_SPITFT::CS_ACTIVE() {
+void Adafruit_SPITFT::CS_ACTIVE(void) {
 #if defined(COMPATIBILITY_MODE)
   digitalWrite(_cs, LOW);
 #else
@@ -1230,7 +1229,7 @@ void Adafruit_SPITFT::writeData16(uint16_t d16)
     @param  y      Vertical position   (0 = top).
     @param  color  16-bit pixel color in '565' RGB format.
 */
-void Adafruit_SPITFT::writePixel(int16_t x, int16_t y, uint16_t color) {
+void Adafruit_SPITFT::drawPixel(int16_t x, int16_t y, uint16_t color) {
   if(x<0 ||x>=_width || y<0 || y>=_height) return;
   setAddrWindow(x, y, x+1, y+1);
 
@@ -1243,7 +1242,7 @@ void Adafruit_SPITFT::writePixel(int16_t x, int16_t y, uint16_t color) {
 
 // /*!
 //     @brief  Swap bytes in an array of pixels; converts little-to-big or
-//             big-to-little endian. Used by writePixels() below in some
+//             big-to-little endian. Used by drawPixels() below in some
 //             situations, but may also be helpful for user code occasionally.
 //     @param  src   Source address of 16-bit pixels buffer.
 //     @param  len   Number of pixels to byte-swap.
@@ -1284,7 +1283,7 @@ void Adafruit_SPITFT::writePixel(int16_t x, int16_t y, uint16_t color) {
 //                        big-endian, this can save time here, ESPECIALLY if
 //                        using this function's non-blocking DMA mode.
 // */
-// void Adafruit_SPITFT::writePixels(uint16_t *colors, uint32_t len, bool block,
+// void Adafruit_SPITFT::drawPixels(uint16_t *colors, uint32_t len, bool block,
 //                                   bool bigEndian) {
 
 //   if (!len)
@@ -1297,14 +1296,14 @@ void Adafruit_SPITFT::writePixel(int16_t x, int16_t y, uint16_t color) {
 // // #if defined(ESP32)
 // //   if (connection == TFT_HARD_SPI) {
 // //     if (!bigEndian) {
-// //       hwspi._spi->writePixels(colors, len * 2); // Inbuilt endian-swap
+// //       hwspi._spi->drawPixels(colors, len * 2); // Inbuilt endian-swap
 // //     } else {
 // //       hwspi._spi->writeBytes((uint8_t *)colors, len * 2); // Issue bytes direct
 // //     }
 // //     return;
 // //   }
-// // #elif defined(ARDUINO_NRF52_ADAFRUIT) &&                                       \
-// //     defined(NRF52840_XXAA) // Adafruit nRF52 use SPIM3 DMA at 32Mhz
+/*/ // #elif defined(ARDUINO_NRF52_ADAFRUIT) &&                                       \
+// //     defined(NRF52840_XXAA) // Adafruit nRF52 use SPIM3 DMA at 32Mhz */
 // //   if (!bigEndian) {
 // //     swapBytes(colors, len); // convert little-to-big endian for display
 // //   }
@@ -1329,8 +1328,8 @@ void Adafruit_SPITFT::writePixel(int16_t x, int16_t y, uint16_t color) {
 // //     spi_write_blocking(pi_spi, (uint8_t *)colors, len * 2);
 // //   }
 // //   return;
-// // #elif defined(USE_SPI_DMA) &&                                                  \
-// //     (defined(__SAMD51__) || defined(ARDUINO_SAMD_ZERO))
+/* / // #elif defined(USE_SPI_DMA) &&                                                  \
+// //     (defined(__SAMD51__) || defined(ARDUINO_SAMD_ZERO)) */
 // //   if ((connection == TFT_HARD_SPI) || (connection == TFT_PARALLEL)) {
 // //     int maxSpan = maxFillLen / 2; // One scanline max
 // //     uint8_t pixelBufIdx = 0;      // Active pixel buffer number
@@ -1444,8 +1443,8 @@ void Adafruit_SPITFT::writePixel(int16_t x, int16_t y, uint16_t color) {
 
 // /*!
 //     @brief  Wait for the last DMA transfer in a prior non-blocking
-//             writePixels() call to complete. This does nothing if DMA
-//             is not enabled, and is not needed if blocking writePixels()
+//             drawPixels() call to complete. This does nothing if DMA
+//             is not enabled, and is not needed if blocking drawPixels()
 //             was used (as is the default case).
 // */
 // void Adafruit_SPITFT::dmaWait(void) {
@@ -1506,13 +1505,13 @@ void Adafruit_SPITFT::writePixel(int16_t x, int16_t y, uint16_t color) {
 // //     // Issue pixels in blocks from temp buffer
 // //     while (len) {                              // While pixels remain
 // //       xferLen = (bufLen < len) ? bufLen : len; // How many this pass?
-// //       writePixels((uint16_t *)temp, xferLen);
+// //       drawPixels((uint16_t *)temp, xferLen);
 // //       len -= xferLen;
 // //     }
 // //     return;
 // //   }
-// // #elif defined(ARDUINO_NRF52_ADAFRUIT) &&                                       \
-// //     defined(NRF52840_XXAA) // Adafruit nRF52840 use SPIM3 DMA at 32Mhz
+/* // #elif defined(ARDUINO_NRF52_ADAFRUIT) &&                                       \
+// //     defined(NRF52840_XXAA) // Adafruit nRF52840 use SPIM3 DMA at 32Mhz */
 // //   // at most 2 scan lines
 // //   uint32_t const pixbufcount = min(len, ((uint32_t)2 * width()));
 // //   uint16_t *pixbuf = (uint16_t *)rtos_malloc(2 * pixbufcount);
@@ -1529,7 +1528,7 @@ void Adafruit_SPITFT::writePixel(int16_t x, int16_t y, uint16_t color) {
 
 // //     while (len) {
 // //       uint32_t const count = min(len, pixbufcount);
-// //       writePixels(pixbuf, count, true, true);
+// //       drawPixels(pixbuf, count, true, true);
 // //       len -= count;
 // //     }
 
@@ -1830,7 +1829,7 @@ void Adafruit_SPITFT::writeFillRect(int16_t x, int16_t y, int16_t w, int16_t h,
                    negative = point of first corner).
     @param  color  16-bit line color in '565' RGB format.
 */
-void inline Adafruit_SPITFT::writeFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) {
+void inline Adafruit_SPITFT::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) {
   if(x<0 ||x>=_width || y<0 || y>=_height) return;
   setAddrWindow(x, y, x+w-1, y);
 
@@ -1852,7 +1851,7 @@ void inline Adafruit_SPITFT::writeFastHLine(int16_t x, int16_t y, int16_t w, uin
                    negative = above first point).
     @param  color  16-bit line color in '565' RGB format.
 */
-void inline Adafruit_SPITFT::writeFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) {
+void inline Adafruit_SPITFT::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) {
   if(x<0 ||x>=_width || y<0 || y>=_height) return;
   setAddrWindow(x, y, x, y+h-1);
 
@@ -1923,7 +1922,7 @@ void Adafruit_SPITFT::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint1
 // /*!
 //     @brief  Draw a single pixel to the display at requested coordinates.
 //             Self-contained and provides its own transaction as needed
-//             (see writePixel(x,y,color) for a lower-level variant).
+//             (see drawPixel(x,y,color) for a lower-level variant).
 //             Edge clipping is performed here.
 //     @param  x      Horizontal position (0 = left).
 //     @param  y      Vertical position   (0 = top).
@@ -2003,7 +2002,7 @@ void Adafruit_SPITFT::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint1
 
 // /*!
 //     @brief  Draw a horizontal line on the display. Self-contained and
-//             provides its own transaction as needed (see writeFastHLine() for
+//             provides its own transaction as needed (see drawFastHLine() for
 //             a lower-level variant). Edge clipping and rejection is performed
 //             here.
 //     @param  x      Horizontal position of first point.
@@ -2011,10 +2010,10 @@ void Adafruit_SPITFT::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint1
 //     @param  w      Line width in pixels (positive = right of first point,
 //                    negative = point of first corner).
 //     @param  color  16-bit line color in '565' RGB format.
-//     @note   This repeats the writeFastHLine() function almost in its
+//     @note   This repeats the drawFastHLine() function almost in its
 //             entirety, with the addition of a transaction start/end. It's
 //             done this way (rather than starting the transaction and calling
-//             writeFastHLine() to handle clipping and so forth) so that the
+//             drawFastHLine() to handle clipping and so forth) so that the
 //             transaction isn't performed at all if the line is rejected.
 // */
 // void Adafruit_SPITFT::drawFastHLine(int16_t x, int16_t y, int16_t w,
@@ -2045,17 +2044,17 @@ void Adafruit_SPITFT::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint1
 
 // /*!
 //     @brief  Draw a vertical line on the display. Self-contained and provides
-//             its own transaction as needed (see writeFastHLine() for a lower-
+//             its own transaction as needed (see drawFastHLine() for a lower-
 //             level variant). Edge clipping and rejection is performed here.
 //     @param  x      Horizontal position of first point.
 //     @param  y      Vertical position of first point.
 //     @param  h      Line height in pixels (positive = below first point,
 //                    negative = above first point).
 //     @param  color  16-bit line color in '565' RGB format.
-//     @note   This repeats the writeFastVLine() function almost in its
+//     @note   This repeats the drawFastVLine() function almost in its
 //             entirety, with the addition of a transaction start/end. It's
 //             done this way (rather than starting the transaction and calling
-//             writeFastVLine() to handle clipping and so forth) so that the
+//             drawFastVLine() to handle clipping and so forth) so that the
 //             transaction isn't performed at all if the line is rejected.
 // */
 // void Adafruit_SPITFT::drawFastVLine(int16_t x, int16_t y, int16_t h,
@@ -2085,7 +2084,7 @@ void Adafruit_SPITFT::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint1
 // }
 
 /*!
-    @brief  Essentially writePixel() with a transaction around it. I don't
+    @brief  Essentially drawPixel() with a transaction around it. I don't
             think this is in use by any of our code anymore (believe it was
             for some older BMP-reading examples), but is kept here in case
             any user code relies on it. Consider it DEPRECATED.
@@ -2248,20 +2247,15 @@ void Adafruit_SPITFT::sendCommand(uint8_t cmd, uint8_t *dataBytes, uint8_t numBy
 // }
 
 /*!
- @brief   Read 8 bits of data from display configuration memory (not RAM).
-          This is highly undocumented/supported and should be avoided,
-          function is only included because some of the examples use it.
- @param   commandByte The command register to read data from.
- @param   index The byte index into the command to read from.
- @return  Unsigned 8-bit data read from display register.
+    @brief   Read 8 bits of data from display configuration memory (not RAM).
+              This is highly undocumented/supported and should be avoided,
+              function is only included because some of the examples use it.
+    @param   commandByte The command register to read data from.
+    @return  Unsigned 8-bit data read from display register.
  */
-uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
-  DC_COMMAND(); // Command mode
+uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte) {
   CS_ACTIVE();
   SPI_START();
-  
-  writeSPI(commandByte);
-
   DC_DATA(); // Data Mode
 
   uint8_t result = writeSPI(commandByte);
