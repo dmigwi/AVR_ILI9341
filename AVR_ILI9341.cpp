@@ -77,6 +77,7 @@
 /**************************************************************************/
 AVR_ILI9341::AVR_ILI9341(int8_t cs, int8_t dc, int8_t rst)
     : Adafruit_SPITFT(ILI9341_TFTWIDTH, ILI9341_TFTHEIGHT, cs, dc, rst) {}
+    
 
 // clang-format off
 // TFT LCD(ILI9341V) startup configuration is available here: 
@@ -92,12 +93,14 @@ static const uint8_t PROGMEM initcmd[] = {
   ILI9341_PWCTR1, 1, 0x13,             // Power control VRH[5:0]
   ILI9341_PWCTR2, 1, 0x13,             // Power control SAP[2:0];BT[3:0]
   ILI9341_VMCTR1, 2, 0x1C, 0x35,       // VCM control
-  ILI9341_VMCTR2, 1, 0xC8,             // VCM control2
-  ILI9341_INVON, 0,  0,                // Display Inversion ON: Invert colors
+  ILI9341_VMCTR2, 1, 0xBD,             // VCM control2
+  ILI9341_INVON, 1,  0,                // Display Inversion ON: Invert colors
   ILI9341_MADCTL, 1, 0x08,             // Memory Access Control
   // ILI9341_VSCRSADD, 1, 0x00,        // Vertical scroll zero
-  ILI9341_PIXFMT, 1, 0x55,             //*** INTERFACE PIXEL FORMAT: 0x66 -> 18 bit; 0x55 -> 16 bit           
-  ILI9341_FRMCTR1, 2, 0x00, 0x18,         // VCM Control
+  ILI9341_DFUNCTR, 2, 0x0A, 0xA2,
+  ILI9341_PIXFMT, 1, 0x55,             //*** INTERFACE PIXEL FORMAT: 0x66 -> 18 bit; 0x55 -> 16 bit    
+  ILI9341_INTFCTR, 2, 0x01, 0x30,       // Interface Control //MCU
+  ILI9341_FRMCTR1, 2, 0x00, 0x1B,         // VCM Control
   // ILI9341_DFUNCTR, 3, 0x08, 0x82, 0x27, // Display Function Control
   ILI9341_EN3GAM, 1, 0x00,                         // 3Gamma Function Disable
   ILI9341_GAMMASET, 1, 0x01,             // Gamma curve selected
@@ -107,7 +110,7 @@ static const uint8_t PROGMEM initcmd[] = {
      0x07, 0x10, 0x0C, 0x32, 0x34, 0x0F, // Negative gamma correction
   ILI9341_SLPOUT, 1, 0x80,                // Exit Sleep
   ILI9341_DISPON, 1, 0x80,               // Display On
-  ILI9341_NOP,                   // shouldn't get executed. End of the List. 
+  ILI9341_NOP,   0,            // shouldn't get executed. End of the List. 
 };
 // clang-format on
 
@@ -133,26 +136,25 @@ void AVR_ILI9341::begin(uint32_t freq) {
   SPI_START();
   // CS_ACTIVE();
 
-  uint8_t cmd, x, numArgs;
+  uint8_t cmd, numArgs;
   const uint8_t *addr = initcmd;
 
   while ((cmd = pgm_read_byte(addr++)) > 0) {
-    x = pgm_read_byte(addr++);
-    numArgs = x & 0x7F;   // Prevent arguments from ever exceeding 127.
+    // Before Display-On cmd execution there should be a delay for CMD_DELAY.
+    if (cmd == ILI9341_DISPON) {
+        delay(CMD_DELAY);
+    }
+
+    numArgs = pgm_read_byte(addr++);
     sendCommand(cmd, addr, numArgs);
     addr += numArgs;
-
-    // After exiting sleep, Display-On should delay for 120ms.
-    // 0xEE is inverse of 0x11. The & operation should result to zero.
-    if ((cmd & 0xEE) == 0)
-      delay(120);
   }
 
   CS_IDLE();
   SPI_END();
 
   // Trigger Horizontal rotation.
-  setRotation(0);
+  // setRotation(0);
 
   _width = ILI9341_TFTWIDTH;
   _height = ILI9341_TFTHEIGHT;
@@ -286,7 +288,7 @@ void AVR_ILI9341::setAddrWindow(int16_t x1, int16_t y1, int16_t x2, int16_t y2) 
     
     DC_COMMAND(); writeSPI(ILI9341_RAMWR);
 
-    // DC_DATA();
+    DC_DATA();
     // no CS_IDLE + SPI_END, DC_DATA to save memory
 }
 

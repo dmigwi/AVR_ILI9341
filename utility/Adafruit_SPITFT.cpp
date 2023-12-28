@@ -948,10 +948,10 @@ void Adafruit_SPITFT::initSPI(uint32_t freq, uint8_t spiMode) {
 */
 uint8_t Adafruit_SPITFT::writeSPI(uint8_t c) {
 #ifdef COMPATIBILITY_MODE
-    // return hwspi._spi->transfer(c);
-    SPDR = (c); 
-    while(!(SPSR & _BV(SPIF)));
-    return SPDR;
+    return hwspi._spi->transfer(c);
+    // SPDR = (c); 
+    // while(!(SPSR & _BV(SPIF)));
+    // return SPDR;
 #else
     SPDR = c;
     /*
@@ -2185,7 +2185,8 @@ void Adafruit_SPITFT::sendCommand(uint8_t cmd, const uint8_t *dataBytes, uint8_t
   DC_DATA();  // Set Command input mode.
 
   for (uint8_t i = 0; i < numBytes; i++) {
-    writeSPI(pgm_read_byte(dataBytes++)); // Send the data bytes
+    uint8_t data = pgm_read_byte(dataBytes++);
+    writeSPI(data); // Send the data bytes
   }
 }
 

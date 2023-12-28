@@ -119,9 +119,10 @@
 #define ILI9341_CMD_EF 0xEF ///< Final LCD column pointer
 
 #define ILI9341_EN3GAM  0xF2 ///< Enable 3G
+#define ILI9341_INTFCTR 0xF6  ///< Interface Control
 #define ILI9341_PUMPRAT 0xF7 ///< Pump ratio control
 
-#define CMD_DELAY   0x80
+#define CMD_DELAY   0x78  ///< 120ms
 //#define ILI9341_PWCTR6     0xFC
 
 // Color definitions
