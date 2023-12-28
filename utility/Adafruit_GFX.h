@@ -81,8 +81,6 @@ class Adafruit_GFX : public Print {
   // This MUST be defined by the subclass
   virtual void drawPixel(int16_t x, int16_t y, uint16_t color) = 0;
 
-  
-
   // These MAY be overridden by the subclass to provide device-specific
   // optimized code.  Otherwise 'generic' versions are used.
   virtual void 

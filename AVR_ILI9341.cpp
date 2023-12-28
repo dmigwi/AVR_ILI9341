@@ -43,9 +43,9 @@
 
 #include "AVR_ILI9341.h"
 // #ifndef ARDUINO_STM32_FEATHER
-// #include "pins_arduino.h"
+#include "pins_arduino.h"
 // #ifndef RASPI
-// #include "wiring_private.h"
+#include "wiring_private.h"
 // #endif
 // #endif
 #include <limits.h>
@@ -79,29 +79,34 @@ AVR_ILI9341::AVR_ILI9341(int8_t cs, int8_t dc, int8_t rst)
     : Adafruit_SPITFT(ILI9341_TFTWIDTH, ILI9341_TFTHEIGHT, cs, dc, rst) {}
 
 // clang-format off
+// TFT LCD(ILI9341V) startup configuration is available here: 
+// http://www.lcdwiki.com/res/MSP2833_MSP2834/ILI9341V_Init.txt
 static const uint8_t PROGMEM initcmd[] = {
-  ILI9341_CMD_EF, 3, 0x03, 0x80, 0x02,
+  // ILI9341_CMD_EF, 3, 0x03, 0x80, 0x02,
   ILI9341_CMD_CF, 3, 0x00, 0xC1, 0x30,
   ILI9341_POWSEQ, 4, 0x64, 0x03, 0x12, 0x81,
   ILI9341_TIMCTRA, 3, 0x85, 0x00, 0x78,
   ILI9341_PWCTRA, 5, 0x39, 0x2C, 0x00, 0x34, 0x02,
   ILI9341_PUMPRAT, 1, 0x20,
   ILI9341_TIMCTRC, 2, 0x00, 0x00,
-  ILI9341_PWCTR1, 1, 0x23,             // Power control VRH[5:0]
-  ILI9341_PWCTR2, 1, 0x10,             // Power control SAP[2:0];BT[3:0]
-  ILI9341_VMCTR1, 2, 0x3e, 0x28,       // VCM control
-  ILI9341_VMCTR2, 1, 0x86,             // VCM control2
-  ILI9341_MADCTL, 1, 0x48,             // Memory Access Control
-  ILI9341_VSCRSADD, 1, 0x00,             // Vertical scroll zero
-  ILI9341_PIXFMT, 1, 0x55,
-  ILI9341_FRMCTR1, 2, 0x00, 0x18,
-  ILI9341_DFUNCTR, 3, 0x08, 0x82, 0x27, // Display Function Control
+  ILI9341_PWCTR1, 1, 0x13,             // Power control VRH[5:0]
+  ILI9341_PWCTR2, 1, 0x13,             // Power control SAP[2:0];BT[3:0]
+  ILI9341_VMCTR1, 2, 0x1C, 0x35,       // VCM control
+  ILI9341_VMCTR2, 1, 0xC8,             // VCM control2
+  ILI9341_INVON, 0,  0,                // Display Inversion ON: Invert colors
+  ILI9341_MADCTL, 1, 0x08,             // Memory Access Control
+  // ILI9341_VSCRSADD, 1, 0x00,        // Vertical scroll zero
+  ILI9341_PIXFMT, 1, 0x55,             //*** INTERFACE PIXEL FORMAT: 0x66 -> 18 bit; 0x55 -> 16 bit           
+  ILI9341_FRMCTR1, 2, 0x00, 0x18,         // VCM Control
+  // ILI9341_DFUNCTR, 3, 0x08, 0x82, 0x27, // Display Function Control
   ILI9341_EN3GAM, 1, 0x00,                         // 3Gamma Function Disable
   ILI9341_GAMMASET, 1, 0x01,             // Gamma curve selected
-  ILI9341_GMCTRP1, 15, 0x0F, 0x31, 0x2B, 0x0C, 0x0E, 0x08, 0x4E, 0xF1, 0x37, 0x07, 0x10, 0x03, 0x0E, 0x09, 0x00, // Set Gamma
-  ILI9341_GMCTRN1, 15, 0x00, 0x0E, 0x14, 0x03, 0x11, 0x07, 0x31, 0xC1, 0x48, 0x08, 0x0F, 0x0C, 0x31, 0x36, 0x0F, // Set Gamma
+  ILI9341_GMCTRP1, 15, 0x0F, 0x35, 0x31, 0x0B, 0x0E, 0x06, 0x49, 0xA7, 0x33, \
+     0x07, 0x0F, 0x03, 0x0C, 0x0A, 0x00, // Positive gamma correction 
+  ILI9341_GMCTRN1, 15, 0x00, 0x0A, 0x0F, 0x04, 0x11, 0x08, 0x36, 0x58, 0x4D, \
+     0x07, 0x10, 0x0C, 0x32, 0x34, 0x0F, // Negative gamma correction
   ILI9341_SLPOUT, 1, 0x80,                // Exit Sleep
-  ILI9341_DISPON, 1, 0x80,                // Display on
+  ILI9341_DISPON, 1, 0x80,               // Display On
   ILI9341_NOP,                   // shouldn't get executed. End of the List. 
 };
 // clang-format on
@@ -117,6 +122,7 @@ void AVR_ILI9341::begin(uint32_t freq) {
 
   if (!freq)
     freq = SPI_DEFAULT_FREQ;
+  
   initSPI(freq);
 
 //   if (_rst < 0) {                 // If no hardware reset pin...
@@ -125,25 +131,28 @@ void AVR_ILI9341::begin(uint32_t freq) {
 //   }
 
   SPI_START();
-  CS_ACTIVE();
+  // CS_ACTIVE();
 
   uint8_t cmd, x, numArgs;
   const uint8_t *addr = initcmd;
 
   while ((cmd = pgm_read_byte(addr++)) > 0) {
     x = pgm_read_byte(addr++);
-    numArgs = x & 0x7F;
+    numArgs = x & 0x7F;   // Prevent arguments from ever exceeding 127.
     sendCommand(cmd, addr, numArgs);
     addr += numArgs;
-    if (x & 0x80)
-      delay(150);
-  }
 
-  // Trigger Horizontal rotation.
-  AVR_ILI9341::setRotation(0);
+    // After exiting sleep, Display-On should delay for 120ms.
+    // 0xEE is inverse of 0x11. The & operation should result to zero.
+    if ((cmd & 0xEE) == 0)
+      delay(120);
+  }
 
   CS_IDLE();
   SPI_END();
+
+  // Trigger Horizontal rotation.
+  setRotation(0);
 
   _width = ILI9341_TFTWIDTH;
   _height = ILI9341_TFTHEIGHT;
@@ -296,8 +305,8 @@ uint8_t AVR_ILI9341::readcommand(uint8_t commandByte, uint8_t index) {
   CS_ACTIVE();
 
   uint8_t data = 0x10 + index;
-  sendCommand((uint8_t)0xD9, &data, (uint8_t)1); // Set Index Register
-  uint8_t result = readcommand8(commandByte);
+  sendCommand(0xD9, &data, 1); // Set Index Register
+  uint8_t result = readcommand8(commandByte, index);
 
   CS_IDLE();
   SPI_END();

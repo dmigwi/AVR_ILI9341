@@ -34,6 +34,7 @@
 #if !defined(__AVR_ATtiny85__) // Not for ATtiny, at all
 
 #include "Adafruit_SPITFT.h"
+#include <pins_arduino.h>
 
 // #if defined(ARDUINO_ARCH_AVR)
 // #if defined(__AVR_XMEGA__) // only tested with __AVR_ATmega4809__
@@ -561,20 +562,16 @@ void Adafruit_SPITFT::initSPI(uint32_t freq, uint8_t spiMode) {
     freq = DEFAULT_SPI_FREQ; // If no freq specified, use default
 
   // Init basic control pins common to all connection types
+  pinMode(_cs, OUTPUT);
+  pinMode(_dc, OUTPUT);
 
-  // if (_cs >= 0) {
-  //   // pinMode(_cs, OUTPUT);
-  //   digitalWrite(_cs, LOW); // Deselect
-  // }
-  // pinMode(_dc, OUTPUT);
-  // // digitalWrite(_dc, HIGH); // Data mode
+  // This are the same default pins defined in pins_arduino.h file
+  pinMode(MOSI, OUTPUT);
+  pinMode(MISO, INPUT);
+  pinMode(SCK, OUTPUT);
 
-#if !defined(COMPATIBILITY_MODE)
-  dcPort = portOutputRegister(digitalPinToPort(_dc));
-  dcMask = digitalPinToBitMask(_dc);
-  csPort = portOutputRegister(digitalPinToPort(_cs));
-  csMask = digitalPinToBitMask(_cs);
-#endif
+  DC_DATA();    // Data mode
+  CS_ACTIVE(); // Deselect
 
 //   if (connection == TFT_HARD_SPI) {
 //   hwspi._spi->begin();
@@ -591,6 +588,10 @@ void Adafruit_SPITFT::initSPI(uint32_t freq, uint8_t spiMode) {
 #else
   hwspi._mode = spiMode; // Save spiMode value for later
   hwspi._freq = freq; // Save frequency value for later
+  dcPort = portOutputRegister(digitalPinToPort(_dc));
+  dcMask = digitalPinToBitMask(_dc);
+  csPort = portOutputRegister(digitalPinToPort(_cs));
+  csMask = digitalPinToBitMask(_cs);
 #endif
 //     // Call hwspi._spi->begin() ONLY if this is among the 'established'
 //     // SPI interfaces in variant.h. For DIY roll-your-own SERCOM SPIs,
@@ -947,7 +948,10 @@ void Adafruit_SPITFT::initSPI(uint32_t freq, uint8_t spiMode) {
 */
 uint8_t Adafruit_SPITFT::writeSPI(uint8_t c) {
 #ifdef COMPATIBILITY_MODE
-    return hwspi._spi->transfer(c);
+    // return hwspi._spi->transfer(c);
+    SPDR = (c); 
+    while(!(SPSR & _BV(SPIF)));
+    return SPDR;
 #else
     SPDR = c;
     /*
@@ -1096,7 +1100,7 @@ void Adafruit_SPITFT::DC_DATA() {
 }
 
 /*!
-      @brief  Sets the data/command line LOW (command mode).
+      @brief  Sets the data/command line LOW (command mode). 
 */
 void Adafruit_SPITFT::DC_COMMAND() {
 #if defined(COMPATIBILITY_MODE)
@@ -1110,7 +1114,9 @@ void Adafruit_SPITFT::DC_COMMAND() {
       @brief  Sets the chip-select line HIGH. Does NOT check whether CS pin
               is set (>=0), that should be handled in calling function.
               Despite function name, this is used even if the display
-              connection is parallel.
+              connection is parallel. When it's high, it ignores the Controller. 
+              This allows you to have multiple SPI devices sharing the same 
+              CIPO, COPI, and SCK lines
   */
 void Adafruit_SPITFT::CS_IDLE() {
 #if defined(COMPATIBILITY_MODE)
@@ -1124,7 +1130,8 @@ void Adafruit_SPITFT::CS_IDLE() {
       @brief  Sets the chip-select line LOW. Does NOT check whether CS pin
               is set (>=0), that should be handled in calling function.
               Despite function name, this is used even if the display
-              connection is parallel.
+              connection is parallel. When a device's Chip Select pin is low, 
+              it communicates with the Controller
   */
 void Adafruit_SPITFT::CS_ACTIVE() {
 #if defined(COMPATIBILITY_MODE)
@@ -1144,9 +1151,9 @@ void Adafruit_SPITFT::CS_ACTIVE() {
     @param  cmd  8-bit command to write.
 */
 void Adafruit_SPITFT::writeCommand(uint8_t cmd) {
+  SPI_START();
   DC_COMMAND();
   CS_ACTIVE();
-  SPI_START();
 
   writeSPI(cmd);
 
@@ -1163,9 +1170,9 @@ void Adafruit_SPITFT::writeCommand(uint8_t cmd) {
     @param  d8  8-bit Data to write.
 */
 void Adafruit_SPITFT::writeData(uint8_t d8) {
+  SPI_START();
   DC_DATA();
   CS_ACTIVE();
-  SPI_START();
     
   writeSPI(d8);
 
@@ -1183,9 +1190,9 @@ void Adafruit_SPITFT::writeData(uint8_t d8) {
 */
 void Adafruit_SPITFT::writeData16(uint16_t d16) 
 {
+  SPI_START();
   DC_DATA();
   CS_ACTIVE();
-  SPI_START();
     
   writeColor(d16,1);
 
@@ -2098,7 +2105,7 @@ void Adafruit_SPITFT::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint1
 */
 void Adafruit_SPITFT::pushColor(uint16_t color) {
   SPI_START();
-  //DC_DATA();
+  DC_DATA();
   CS_ACTIVE();
 
   writeColor(color, 1);
@@ -2188,14 +2195,24 @@ void Adafruit_SPITFT::sendCommand(uint8_t cmd, const uint8_t *dataBytes, uint8_t
             should be managed by its' caller. This is done to increase its 
             efficiency on cases when multiple simultaneous calls need to be executed.
             This is highly undocumented/supported and should be avoided,
-            function is only included because some of the examples use it.
+            function is only included because some of the examples use it. Uses 
+            NOP (0x00) instruction to read command output.
     @param   commandByte The command register to read data from.
+    @param   index The byte index into the command to read from.
     @return  Unsigned 8-bit data read from display register.
  */
-uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte) {
-  DC_DATA(); // Data Mode
+uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
+  DC_COMMAND();           // Set Command input mode.
+  writeSPI(commandByte);
 
-  return writeSPI(commandByte);
+  // DC_DATA();              // Data Mode
+  uint8_t result;
+
+  do {
+    result = writeSPI(0x00); // query the NOP instruction.
+  } while (index--); // Discard bytes up to index'th
+
+  return result;
 }
 
 // /*!

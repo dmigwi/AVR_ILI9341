@@ -33,8 +33,8 @@
 
 // HARDWARE CONFIG ---------------------------------------------------------
 
-#if defined(ARDUINO_ARCH_AVR)
-typedef uint8_t ADAGFX_PORT_t;       ///< PORT values are 8-bit
+// #if defined(ARDUINO_ARCH_AVR)
+// typedef uint8_t ADAGFX_PORT_t;       ///< PORT values are 8-bit
 // #define USE_FAST_PINIO               ///< Use direct PORT register access
 // #elif defined(ARDUINO_STM32_FEATHER) // WICED
 // typedef class HardwareSPI SPIClass;        ///< SPI is a bit odd on WICED
@@ -68,8 +68,8 @@ typedef uint8_t ADAGFX_PORT_t;       ///< PORT values are 8-bit
 // // on these platforms is reasonably efficient and already RAM-resident,
 // // only gotcha then is no parallel connection support for now.
 // typedef uint32_t ADAGFX_PORT_t; ///< PORT values are 32-bit
-#endif                                     // end !ARM
-typedef volatile ADAGFX_PORT_t *PORTreg_t; ///< PORT register type
+// #endif                                     // end !ARM
+// typedef volatile ADAGFX_PORT_t *PORTreg_t; ///< PORT register type
 
 #if defined(ARDUINO_ARCH_AVR)
 #define DEFAULT_SPI_FREQ 8000000L ///< Hardware SPI default speed
@@ -426,7 +426,7 @@ protected:
   // 1 for SPI_MODE1, etc...use ONLY the SPI_MODEn defines! Only!
   // Name is outdated (interface may be parallel) but for compatibility:
   void initSPI(uint32_t freq = 0, uint8_t spiMode = SPI_MODE0);
-  void setSPISpeed(uint32_t freq);
+  // void setSPISpeed(uint32_t freq);
   // Chip select and/or hardware SPI transaction start as needed:
   void SPI_START();
   // Chip deselect and/or hardware SPI transaction end as needed:
@@ -436,7 +436,7 @@ protected:
   //                  uint8_t numDataBytes = 0);
   // void sendCommand16(uint16_t commandWord, const uint8_t *dataBytes = NULL,
   //                    uint8_t numDataBytes = 0);
-  uint8_t readcommand8(uint8_t commandByte);
+  uint8_t readcommand8(uint8_t commandByte, uint8_t index);
   // uint16_t readcommand16(uint16_t addr);
 
   // Does the actual writing 8-bit DATA/COMMAND and returns an output if any exists.
