@@ -83,7 +83,6 @@ class TFT_SPI : public Adafruit_GFX {
   // PUBLIC CLASS MEMBER FUNCTIONS
   // ---------------------------------------------------------------------------
 
-  void writeColor(uint16_t color, uint32_t len);
   void drawPixel(int16_t x, int16_t y, uint16_t color);
   void drawLine(int16_t x, int16_t y, int16_t w, lineType line, uint16_t color);
   inline void drawRect(int16_t x, int16_t y, int16_t w, int16_t h,
@@ -92,11 +91,12 @@ class TFT_SPI : public Adafruit_GFX {
   void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
   void drawImage(int16_t x, int16_t y, uint16_t *pcolors, int16_t w, int16_t h);
 
-  void fillScreen(uint16_t color);
   void invertDisplay(bool mode);
+  uint16_t TFT_SPI::color565(uint8_t red, uint8_t green, uint8_t blue);
 
   void writeData(uint8_t data);    // Write single byte as DATA
   void writeCommand(uint8_t cmd);  // Write single byte as Command
+  void writeData16(uint16_t color, uint32_t len); // Writes 16 bit for provided counts.
 
   void writeImage(uint8_t *img, uint16_t num);  // Writes image efficiently
 
@@ -142,12 +142,9 @@ class TFT_SPI : public Adafruit_GFX {
 
     struct {           ///<  Values specific to HARDWARE SPI
       SPIClass *_spi;  ///< SPI class pointer
-      uint32_t _mode;  ///< SPI data mode
 
 #if defined(SPI_HAS_TRANSACTION)
       SPISettings settings;  ///< SPI transaction settings
-#else
-    uint32_t _freq;  ///< SPI bitrate
 #endif
     } hwspi;  ///< Hardware SPI values
 
@@ -159,8 +156,8 @@ class TFT_SPI : public Adafruit_GFX {
   int8_t _rst;         ///< Reset pin # (or -1)
   int8_t _cs;          ///< Chip select pin # (or -1)
   int8_t _dc;          ///< Data/command pin #
-
-  uint32_t _freq = 0;  ///< Dummy var to keep subclasses happy
+  uint8_t invertOnCommand = 0;  ///< Command to enable invert mode
+  uint8_t invertOffCommand = 0; ///< Command to disable invert mode
 };
 
 #endif  // end _TFT_SPI_H_
