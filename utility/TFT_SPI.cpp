@@ -1,21 +1,14 @@
 /*!
- * @file TFT_SPI.cpp
- *
- * @mainpage Adafruit SPI TFT Displays (and some others)
+ * @file TFT_SPI.cpp (Originally Adafruit_SPITFT.cpp)
  *
  * @section intro_sec Introduction
  *
- * Part of Adafruit's GFX graphics library. Originally this class was
- * written to handle a range of color TFT displays connected via SPI,
- * but over time this library and some display-specific subclasses have
- * mutated to include some color OLEDs as well as parallel-interfaced
- * displays. The name's been kept for the sake of older code.
- *
- * Adafruit invests time and resources providing this open source code,
- * please support Adafruit and open-source hardware by purchasing
- * products from Adafruit!
-
- * @section dependencies Dependencies
+ * This file is part AVR_ILI9341 library package files. It is an implementation
+ * of the TFT Display using the chipset ILI9341V and been optimised mainly 
+ * for Leonardo and Mega 2560 boards. It may work with other AVR boards but 
+ * that cannot be guaranteed.
+ * 
+ *  @section dependencies Dependencies
  *
  * This library depends on <a href="https://github.com/adafruit/Adafruit_GFX">
  * Adafruit_GFX</a> being present on your system. Please make sure you have
@@ -23,10 +16,11 @@
  *
  * @section author Author
  *
- * Written by Limor "ladyada" Fried for Adafruit Industries,
+ * Originally written by Limor "ladyada" Fried for Adafruit Industries,
  * with contributions from the open source community.
- *
- * @section license License
+ * Improved by dmigwi (Daniel Migwi)
+ * 
+ *  @section license License
  *
  * BSD license, all text here must be included in any redistribution.
  */
@@ -954,123 +948,39 @@ void TFT_SPI::initSPI(uint32_t freq, uint8_t spiMode) {
 }
 
 /*!
-    @brief  writeSPI is optimised for the best speed results.
-    @param c is the byte data to be written.
-
-   ----speed test results----:
-    in AVR best performance mode -> about 7.1 Mbps
-    in compatibility mode (hwspi._spi->transfer((uint8_t)0)) -> about 4 Mbps
+    @brief  Does the actual writing of 8-bit Data or Command. To write a command
+            chipset pin must set to low and otherwise when sending data.
+    @param c 8-bit Data/Command to be executed. 
+    @returns an output if any exists. To read the output registers, the NOP
+              should be used.
 */
 uint8_t TFT_SPI::writeSPI(uint8_t c) {
-#ifdef COMPATIBILITY_MODE
     return hwspi._spi->transfer(c);
-    // SPDR = (c); 
-    // while(!(SPSR & _BV(SPIF)));
-    // return SPDR;
-#else
-    SPDR = c;
-    /*
-    asm volatile("nop;"); // 8 NOPs seem to be enough for 16MHz AVR @ DIV2 to avoid using while loop
-    asm volatile("nop");
-    asm volatile("nop");
-    asm volatile("nop");
-    asm volatile("nop");
-    asm volatile("nop");
-    asm volatile("nop");
-    asm volatile("nop");
-    */
-    asm volatile("rjmp .+0\n");  // same cycles but uses half the memory
-    asm volatile("rjmp .+0\n");
-    asm volatile("rjmp .+0\n");
-    asm volatile("rjmp .+0\n");
-    while(!(SPSR & _BV(SPIF)));
-    return SPDR;
-#endif
 }
 
 /*!
-    @brief          Issue a series of pixels, all the same color.
-                    ---A fast method to send multiple 16-bit values via SPI.---
+    @brief   Issue a series of pixels, all the same color.
+            ---A fast method to send multiple 16-bit values via SPI.---
     @param  color  16-bit pixel color in '565' RGB format.
     @param  len    Number of pixels to draw.   
 */
 void TFT_SPI::writeColor(uint16_t color, uint32_t len) {
-#ifdef COMPATIBILITY_MODE
   while(len > 0) { 
-    hwspi._spi->transfer(color>>8);
-    hwspi._spi->transfer(color);
+    writeSPI(color>>8);
+    writeSPI(color);
     len--;
   }
-#else
-  // for (SPDR = (len); (!(SPSR & _BV(SPIF)));
-  asm volatile (
-  "next:\n"
-    "out %[spdr],%[hi]\n"
-    "rjmp .+0\n"  // wait 8*2+1 = 17 cycles
-    "rjmp .+0\n"
-    "rjmp .+0\n"
-    "rjmp .+0\n"
-    "rjmp .+0\n"
-    "rjmp .+0\n"
-    "rjmp .+0\n"
-    "rjmp .+0\n"
-    "nop\n"
-    "out %[spdr],%[lo]\n"
-    "rjmp .+0\n"  // wait 6*2+1 = 13 cycles + sbiw + brne
-    "rjmp .+0\n"
-    "rjmp .+0\n"
-    "rjmp .+0\n"
-    "rjmp .+0\n"
-    "rjmp .+0\n"
-    "nop\n"
-    "sbiw %[num],1\n"
-    "brne next\n"
-    : [num] "+w" (len)
-    : [spdr] "I" (_SFR_IO_ADDR(SPDR)), [lo] "r" ((uint8_t)color), [hi] "r" ((uint8_t)(color>>8))
-  );
-#endif
 } 
 
 // ----------------------------------------------------------
 // fast method to send multiple 16-bit values from RAM via SPI
-inline void TFT_SPI::copyImg(uint8_t *img, uint16_t num) {
-#ifdef COMPATIBILITY_MODE
+inline void TFT_SPI::writeImage(uint8_t *img, uint16_t num) {
   while(num > 0) { 
-    hwspi._spi->transfer(*(img+1)); 
-    hwspi._spi->transfer(*(img+0)); 
+    writeSPI(*(img+1)); 
+    writeSPI(*(img+0)); 
     img+=2; 
     num--;
     }
-#else
-  uint8_t lo = 0;
-  uint8_t hi = 0;
-  asm volatile
-  (
-  "nextCopy:\n"
-    "ld   %[hi],%a[img]+\n"
-    "ld   %[lo],%a[img]+\n"
-    "out %[spdr],%[lo]\n"
-    "rjmp .+0\n"  // wait 8*2+1 = 17 cycles
-    "rjmp .+0\n"
-    "rjmp .+0\n"
-    "rjmp .+0\n"
-    "rjmp .+0\n"
-    "rjmp .+0\n"
-    "rjmp .+0\n"
-    "rjmp .+0\n"
-    "nop\n"
-    "out %[spdr],%[hi]\n"
-    "rjmp .+0\n"  // wait 4*2+1 = 9 cycles + sbiw + brne + ld*2
-    "rjmp .+0\n"
-    "rjmp .+0\n"
-    "rjmp .+0\n"
-    "nop\n"
-    "sbiw %[num],1\n"
-    "brne nextCopy\n"
-    : [num] "+w" (num)
-    : [spdr] "I" (_SFR_IO_ADDR(SPDR)), [img] "e" (img), [lo] "r" (lo), [hi] "r" (hi)
-  );
-#endif
 } 
 
 // /*!
