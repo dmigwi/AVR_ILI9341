@@ -1,26 +1,14 @@
 /*!
- * @file Adafruit_SPITFT.h
+ * @file TFT_SPI.h
  *
- * Part of Adafruit's GFX graphics library. Originally this class was
- * written to handle a range of color TFT displays connected via SPI,
- * but over time this library and some display-specific subclasses have
- * mutated to include some color OLEDs as well as parallel-interfaced
- * displays. The name's been kept for the sake of older code.
- *
- * Adafruit invests time and resources providing this open source code,
- * please support Adafruit and open-source hardware by purchasing
- * products from Adafruit!
- *
- * Written by Limor "ladyada" Fried for Adafruit Industries,
- * with contributions from the open source community.
+ * This file is SPI implementation of the TFT Display using the chipset ILI9341V.
+ * It has been optimissed
  *
  * BSD license, all text here must be included in any redistribution.
  */
 
-#ifndef _ADAFRUIT_SPITFT_H_
-#define _ADAFRUIT_SPITFT_H_
-
-#if !defined(__AVR_ATtiny85__) // Not for ATtiny, at all
+#ifndef _TFT_SPI_H_
+#define _TFT_SPI_H_
 
 // ------------------------------------
 // remove "define COMPATIBILITY_MODE" for best performance on 16MHz AVR Arduinos
@@ -72,7 +60,7 @@
 // typedef volatile ADAGFX_PORT_t *PORTreg_t; ///< PORT register type
 
 #if defined(ARDUINO_ARCH_AVR)
-#define DEFAULT_SPI_FREQ 8000000L ///< Hardware SPI default speed
+#define DEFAULT_SPI_FREQ 8000000L ///< half Hardware SPI default speed
 #else
 #define DEFAULT_SPI_FREQ 16000000L ///< Hardware SPI default speed
 #endif
@@ -111,7 +99,7 @@
 // CLASS DEFINITION --------------------------------------------------------
 
 /*!
-  @brief  Adafruit_SPITFT is an intermediary class between Adafruit_GFX
+  @brief  TFT_SPI is an intermediary class between Adafruit_GFX
           and various hardware-specific subclasses for different displays.
           It handles certain operations that are common to a range of
           displays (address window, area fills, etc.). Originally these were
@@ -123,7 +111,7 @@
           again to avoid breaking a lot of other code. If in doubt, read
           the comments.
 */
-class Adafruit_SPITFT : public Adafruit_GFX {
+class TFT_SPI : public Adafruit_GFX {
 
 public:
   // CONSTRUCTORS --------------------------------------------------------
@@ -133,7 +121,7 @@ public:
   // // (reset, miso). cs argument is required but can be -1 if unused --
   // // rather than moving it to the optional arguments, it was done this way
   // // to avoid breaking existing code (-1 option was a later addition).
-  // Adafruit_SPITFT(uint16_t w, uint16_t h, int8_t cs, int8_t dc, int8_t mosi,
+  // TFT_SPI(uint16_t w, uint16_t h, int8_t cs, int8_t dc, int8_t mosi,
   //                 int8_t sck, int8_t rst = -1, int8_t miso = -1);
 
   // Hardware SPI constructor using the default SPI port: expects width &
@@ -141,13 +129,13 @@ public:
   // optional reset pin. cs is required but can be -1 if unused -- rather
   // than moving it to the optional arguments, it was done this way to
   // avoid breaking existing code (-1 option was a later addition).
-  Adafruit_SPITFT(uint16_t w, uint16_t h, int8_t cs, int8_t dc, int8_t rst = -1);
+  TFT_SPI(uint16_t w, uint16_t h, int8_t cs, int8_t dc, int8_t rst = -1);
 
 // #if !defined(ESP8266) // See notes in .cpp
 //   // Hardware SPI constructor using an arbitrary SPI peripheral: expects
 //   // width & height (rotation 0), SPIClass pointer, 2 signal pins (cs, dc)
 //   // and optional reset pin. cs is required but can be -1 if unused.
-//   Adafruit_SPITFT(uint16_t w, uint16_t h, SPIClass *spiClass, int8_t cs,
+//   TFT_SPI(uint16_t w, uint16_t h, SPIClass *spiClass, int8_t cs,
 //                   int8_t dc, int8_t rst = -1);
 // #endif // end !ESP8266
 
@@ -156,13 +144,13 @@ public:
   // // pins (d0, wr, dc), 3 optional pins (cs, rst, rd). 16-bit parallel
   // // isn't even fully implemented but the 'wide' flag was added as a
   // // required argument to avoid ambiguity with other constructors.
-  // Adafruit_SPITFT(uint16_t w, uint16_t h, tftBusWidth busWidth, int8_t d0,
+  // TFT_SPI(uint16_t w, uint16_t h, tftBusWidth busWidth, int8_t d0,
   //                 int8_t wr, int8_t dc, int8_t cs = -1, int8_t rst = -1,
   //                 int8_t rd = -1);
 
   // DESTRUCTOR ----------------------------------------------------------
 
- virtual ~Adafruit_SPITFT(){};
+ virtual ~TFT_SPI(){};
 
   // CLASS MEMBER FUNCTIONS ----------------------------------------------
 
@@ -283,7 +271,7 @@ public:
   // uint16_t readData16(void);         // Read single 16-bit value
 
   // Most of these low-level functions were formerly macros in
-  // Adafruit_SPITFT_Macros.h. Some have been made into inline functions
+  // TFT_SPI_Macros.h. Some have been made into inline functions
   // to avoid macro mishaps. Despite the addition of code for a parallel
   // display interface, the names have been kept for backward
   // compatibility (some subclasses may be invoking these):
@@ -612,5 +600,4 @@ protected:
   uint32_t _freq = 0; ///< Dummy var to keep subclasses happy
 };
 
-#endif // end __AVR_ATtiny85__
-#endif // end _ADAFRUIT_SPITFT_H_
+#endif // end _TFT_SPI_H_

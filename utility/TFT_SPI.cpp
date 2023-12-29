@@ -1,5 +1,5 @@
 /*!
- * @file Adafruit_SPITFT.cpp
+ * @file TFT_SPI.cpp
  *
  * @mainpage Adafruit SPI TFT Displays (and some others)
  *
@@ -33,7 +33,7 @@
 
 #if !defined(__AVR_ATtiny85__) // Not for ATtiny, at all
 
-#include "Adafruit_SPITFT.h"
+#include "TFT_SPI.h"
 #include <pins_arduino.h>
 
 // #if defined(ARDUINO_ARCH_AVR)
@@ -93,13 +93,13 @@ static const struct {
 #endif // end USE_SPI_DMA
 ***/
 
-// Possible values for Adafruit_SPITFT.connection:
+// Possible values for TFT_SPI.connection:
 #define TFT_HARD_SPI 0 ///< Display interface = hardware SPI
 #define TFT_SOFT_SPI 1 ///< Display interface = software SPI
 #define TFT_PARALLEL 2 ///< Display interface = 8- or 16-bit parallel
 
 // #ifdef COMPATIBILITY_MODE
-// Adafruit_SPITFT::HwSPI hwspi;
+// TFT_SPI::HwSPI hwspi;
 // #define SPI_START  hwspi._spi.beginTransaction(hwspi.settings)
 // #define SPI_END    hwspi._spi.endTransaction()
 // #else
@@ -123,7 +123,7 @@ static const struct {
 // CONSTRUCTORS ------------------------------------------------------------
 
 // /*!
-//     @brief   Adafruit_SPITFT constructor for software (bitbang) SPI.
+//     @brief   TFT_SPI constructor for software (bitbang) SPI.
 //     @param   w     Display width in pixels at default rotation setting (0).
 //     @param   h     Display height in pixels at default rotation setting (0).
 //     @param   cs    Arduino pin # for chip-select (-1 if unused, tie CS low).
@@ -138,7 +138,7 @@ static const struct {
 //              need to call subclass' begin() function, which in turn calls
 //              this library's initSPI() function to initialize pins.
 // */
-// Adafruit_SPITFT::Adafruit_SPITFT(uint16_t w, uint16_t h, int8_t cs, int8_t dc,
+// TFT_SPI::TFT_SPI(uint16_t w, uint16_t h, int8_t cs, int8_t dc,
 //                                  int8_t mosi, int8_t sck, int8_t rst,
 //                                  int8_t miso)
 //     : Adafruit_GFX(w, h), connection(TFT_SOFT_SPI), _rst(rst), _cs(cs),
@@ -246,7 +246,7 @@ static const struct {
 // }
 
 // /*!
-//     @brief   Adafruit_SPITFT constructor for hardware SPI using the board's
+//     @brief   TFT_SPI constructor for hardware SPI using the board's
 //              default SPI peripheral.
 //     @param   w     Display width in pixels at default rotation setting (0).
 //     @param   h     Display height in pixels at default rotation setting (0).
@@ -260,16 +260,16 @@ static const struct {
 // */
 
 // #if defined(ESP8266) // See notes below
-// Adafruit_SPITFT::Adafruit_SPITFT(uint16_t w, uint16_t h, int8_t cs, int8_t dc,
+// TFT_SPI::TFT_SPI(uint16_t w, uint16_t h, int8_t cs, int8_t dc,
 //                                  int8_t rst)
 //     : Adafruit_GFX(w, h), connection(TFT_HARD_SPI), _rst(rst), _cs(cs),
 //       _dc(dc) {
 //   hwspi._spi = &SPI;
 // }
 // #else  // !ESP8266
-// Adafruit_SPITFT::Adafruit_SPITFT(uint16_t w, uint16_t h, int8_t cs, int8_t dc,
+// TFT_SPI::TFT_SPI(uint16_t w, uint16_t h, int8_t cs, int8_t dc,
 //                                  int8_t rst)
-//     : Adafruit_SPITFT(w, h, &SPI, cs, dc, rst) {
+//     : TFT_SPI(w, h, &SPI, cs, dc, rst) {
 //   // This just invokes the hardware SPI constructor below,
 //   // passing the default SPI device (&SPI).
 // }
@@ -284,7 +284,7 @@ static const struct {
 // // peripheral and drives it with software bitbanging, that's not supported.
 
 /*!
-    @brief   Adafruit_SPITFT constructor for hardware SPI using a specific
+    @brief   TFT_SPI constructor for hardware SPI using a specific
              SPI peripheral.
     @param   w         Display width in pixels at default rotation (0).
     @param   h         Display height in pixels at default rotation (0).
@@ -303,7 +303,7 @@ static const struct {
              GPIO manually. Do this BEFORE calling the display-specific
              begin or init function. Unfortunate but unavoidable.
 */
-Adafruit_SPITFT::Adafruit_SPITFT(uint16_t w, uint16_t h, int8_t cs, int8_t dc, int8_t rst)
+TFT_SPI::TFT_SPI(uint16_t w, uint16_t h, int8_t cs, int8_t dc, int8_t rst)
     :Adafruit_GFX(w, h) {
   connection = TFT_HARD_SPI;
   _rst = rst;
@@ -313,7 +313,7 @@ Adafruit_SPITFT::Adafruit_SPITFT(uint16_t w, uint16_t h, int8_t cs, int8_t dc, i
   _height = h;
   hwspi._spi = &SPI; //Pointer to SPIClass type (e.g. &SPI or &SPI1).
 
-  rotation = 0;
+  // rotation = 0;
 
 // #if defined(USE_FAST_PINIO)
 // #if defined(HAS_PORT_SET_CLR)
@@ -376,7 +376,7 @@ Adafruit_SPITFT::Adafruit_SPITFT(uint16_t w, uint16_t h, int8_t cs, int8_t dc, i
 // #endif // end !ESP8266
 
 // /*!
-//     @brief   Adafruit_SPITFT constructor for parallel display connection.
+//     @brief   TFT_SPI constructor for parallel display connection.
 //     @param   w         Display width in pixels at default rotation (0).
 //     @param   h         Display height in pixels at default rotation (0).
 //     @param   busWidth  If tft16 (enumeration in header file), is a 16-bit
@@ -406,7 +406,7 @@ Adafruit_SPITFT::Adafruit_SPITFT(uint16_t w, uint16_t h, int8_t cs, int8_t dc, i
 //              only SPI displays, parallel being a recent addition (but not
 //              wanting to break existing code).
 // */
-// Adafruit_SPITFT::Adafruit_SPITFT(uint16_t w, uint16_t h, tftBusWidth busWidth,
+// TFT_SPI::TFT_SPI(uint16_t w, uint16_t h, tftBusWidth busWidth,
 //                                  int8_t d0, int8_t wr, int8_t dc, int8_t cs,
 //                                  int8_t rst, int8_t rd)
 //     : Adafruit_GFX(w, h), connection(TFT_PARALLEL), _rst(rst), _cs(cs),
@@ -556,7 +556,7 @@ Adafruit_SPITFT::Adafruit_SPITFT(uint16_t w, uint16_t h, int8_t cs, int8_t dc, i
             could probably be made private...quite a few class functions
             were generously put in the public section.
 */
-void Adafruit_SPITFT::initSPI(uint32_t freq, uint8_t spiMode) {
+void TFT_SPI::initSPI(uint32_t freq, uint8_t spiMode) {
 
   if (!freq)
     freq = DEFAULT_SPI_FREQ; // If no freq specified, use default
@@ -572,6 +572,21 @@ void Adafruit_SPITFT::initSPI(uint32_t freq, uint8_t spiMode) {
 
   DC_DATA();    // Data mode
   CS_ACTIVE(); // Deselect
+
+  pinMode(_rst, OUTPUT);
+  digitalWrite(_rst, LOW);
+  delay(200);
+  // if (_rst >= 0) {
+  //   // Toggle _rst low to reset
+  //   pinMode(_rst, OUTPUT);
+  //   digitalWrite(_rst, HIGH);
+  //   delay(200);
+  //   digitalWrite(_rst, LOW);
+  //   delay(200);
+  //   digitalWrite(_rst, HIGH);
+  //   delay(200);
+  // }
+  
 
 //   if (connection == TFT_HARD_SPI) {
 //   hwspi._spi->begin();
@@ -688,13 +703,13 @@ void Adafruit_SPITFT::initSPI(uint32_t freq, uint8_t spiMode) {
 
   if (_rst >= 0) {
     // Toggle _rst low to reset
-    pinMode(_rst, OUTPUT);
+    // pinMode(_rst, OUTPUT);
     digitalWrite(_rst, HIGH);
-    delay(50);
+    delay(200);
     digitalWrite(_rst, LOW);
-    delay(100);
+    delay(200);
     digitalWrite(_rst, HIGH);
-    delay(50);
+    delay(200);
   }
 
 // #if defined(USE_SPI_DMA) && (defined(__SAMD51__) || defined(ARDUINO_SAMD_ZERO))
@@ -946,7 +961,7 @@ void Adafruit_SPITFT::initSPI(uint32_t freq, uint8_t spiMode) {
     in AVR best performance mode -> about 7.1 Mbps
     in compatibility mode (hwspi._spi->transfer((uint8_t)0)) -> about 4 Mbps
 */
-uint8_t Adafruit_SPITFT::writeSPI(uint8_t c) {
+uint8_t TFT_SPI::writeSPI(uint8_t c) {
 #ifdef COMPATIBILITY_MODE
     return hwspi._spi->transfer(c);
     // SPDR = (c); 
@@ -979,7 +994,7 @@ uint8_t Adafruit_SPITFT::writeSPI(uint8_t c) {
     @param  color  16-bit pixel color in '565' RGB format.
     @param  len    Number of pixels to draw.   
 */
-void Adafruit_SPITFT::writeColor(uint16_t color, uint32_t len) {
+void TFT_SPI::writeColor(uint16_t color, uint32_t len) {
 #ifdef COMPATIBILITY_MODE
   while(len > 0) { 
     hwspi._spi->transfer(color>>8);
@@ -1018,7 +1033,7 @@ void Adafruit_SPITFT::writeColor(uint16_t color, uint32_t len) {
 
 // ----------------------------------------------------------
 // fast method to send multiple 16-bit values from RAM via SPI
-inline void Adafruit_SPITFT::copyImg(uint8_t *img, uint16_t num) {
+inline void TFT_SPI::copyImg(uint8_t *img, uint16_t num) {
 #ifdef COMPATIBILITY_MODE
   while(num > 0) { 
     hwspi._spi->transfer(*(img+1)); 
@@ -1063,7 +1078,7 @@ inline void Adafruit_SPITFT::copyImg(uint8_t *img, uint16_t num) {
 //     @param  freq Desired frequency of SPI clock, may not be the
 //     end frequency you get based on what the chip can do!
 // */
-// void Adafruit_SPITFT::setSPISpeed(uint32_t freq) {
+// void TFT_SPI::setSPISpeed(uint32_t freq) {
 // #if defined(SPI_HAS_TRANSACTION)
 //   hwspi.settings = SPISettings(freq, MSBFIRST, hwspi._mode);
 // #else
@@ -1073,7 +1088,7 @@ inline void Adafruit_SPITFT::copyImg(uint8_t *img, uint16_t num) {
 /*!
     @brief Enables the command to be run, to gain exclusive access to the SPI bus.
 */
-void Adafruit_SPITFT::SPI_START() {
+void TFT_SPI::SPI_START() {
 #if defined(COMPATIBILITY_MODE)
   hwspi._spi->beginTransaction(hwspi.settings);
 #endif
@@ -1082,7 +1097,7 @@ void Adafruit_SPITFT::SPI_START() {
 /*!
     @brief Releases the access to the SPI bus for others to use.
 */
-void Adafruit_SPITFT::SPI_END() {
+void TFT_SPI::SPI_END() {
 #if defined(COMPATIBILITY_MODE)
   hwspi._spi->endTransaction();
 #endif
@@ -1091,7 +1106,7 @@ void Adafruit_SPITFT::SPI_END() {
 /*!
     @brief  Sets the data/command line HIGH (data mode).
 */
-void Adafruit_SPITFT::DC_DATA() {
+void TFT_SPI::DC_DATA() {
 #if defined(COMPATIBILITY_MODE)
   digitalWrite(_dc, HIGH);
 #else
@@ -1102,7 +1117,7 @@ void Adafruit_SPITFT::DC_DATA() {
 /*!
       @brief  Sets the data/command line LOW (command mode). 
 */
-void Adafruit_SPITFT::DC_COMMAND() {
+void TFT_SPI::DC_COMMAND() {
 #if defined(COMPATIBILITY_MODE)
   digitalWrite(_dc, LOW);
 #else
@@ -1118,7 +1133,7 @@ void Adafruit_SPITFT::DC_COMMAND() {
               This allows you to have multiple SPI devices sharing the same 
               CIPO, COPI, and SCK lines
   */
-void Adafruit_SPITFT::CS_IDLE() {
+void TFT_SPI::CS_IDLE() {
 #if defined(COMPATIBILITY_MODE)
   digitalWrite(_cs, HIGH);
 #else
@@ -1133,7 +1148,7 @@ void Adafruit_SPITFT::CS_IDLE() {
               connection is parallel. When a device's Chip Select pin is low, 
               it communicates with the Controller
   */
-void Adafruit_SPITFT::CS_ACTIVE() {
+void TFT_SPI::CS_ACTIVE() {
 #if defined(COMPATIBILITY_MODE)
   digitalWrite(_cs, LOW);
 #else
@@ -1150,7 +1165,7 @@ void Adafruit_SPITFT::CS_ACTIVE() {
             interface shutdown.
     @param  cmd  8-bit command to write.
 */
-void Adafruit_SPITFT::writeCommand(uint8_t cmd) {
+void TFT_SPI::writeCommand(uint8_t cmd) {
   SPI_START();
   DC_COMMAND();
   CS_ACTIVE();
@@ -1169,7 +1184,7 @@ void Adafruit_SPITFT::writeCommand(uint8_t cmd) {
             interface shutdown.
     @param  d8  8-bit Data to write.
 */
-void Adafruit_SPITFT::writeData(uint8_t d8) {
+void TFT_SPI::writeData(uint8_t d8) {
   SPI_START();
   DC_DATA();
   CS_ACTIVE();
@@ -1188,7 +1203,7 @@ void Adafruit_SPITFT::writeData(uint8_t d8) {
             interface shutdown.
     @param  d16  16-bit Data to write.
 */
-void Adafruit_SPITFT::writeData16(uint16_t d16) 
+void TFT_SPI::writeData16(uint16_t d16) 
 {
   SPI_START();
   DC_DATA();
@@ -1206,7 +1221,7 @@ void Adafruit_SPITFT::writeData16(uint16_t d16)
             using hardware SPI and transactions are supported). Required
             for all display types; not an SPI-specific function.
 */
-// void Adafruit_SPITFT::startWrites(void) {
+// void TFT_SPI::startWrites(void) {
 //   SPI_BEGIN_TRANSACTION();
 //   if (_cs >= 0)
 //     SPI_CS_LOW();
@@ -1218,7 +1233,7 @@ void Adafruit_SPITFT::writeData16(uint16_t d16)
             using hardware SPI and transactions are supported). Required
             for all display types; not an SPI-specific function.
 */
-// void Adafruit_SPITFT::endWrites(void) {
+// void TFT_SPI::endWrites(void) {
 //   if (_cs >= 0)
 //     SPI_CS_HIGH();
 //   SPI_END_TRANSACTION();
@@ -1239,7 +1254,7 @@ void Adafruit_SPITFT::writeData16(uint16_t d16)
     @param  y      Vertical position   (0 = top).
     @param  color  16-bit pixel color in '565' RGB format.
 */
-void Adafruit_SPITFT::drawPixel(int16_t x, int16_t y, uint16_t color) {
+void TFT_SPI::drawPixel(int16_t x, int16_t y, uint16_t color) {
   if(x<0 ||x>=_width || y<0 || y>=_height) return;
   setAddrWindow(x, y, x+1, y+1);
 
@@ -1260,7 +1275,7 @@ void Adafruit_SPITFT::drawPixel(int16_t x, int16_t y, uint16_t color) {
 //                   otherwise, if NULL (default) or same address is passed,
 //                   pixel buffer is overwritten in-place.
 // */
-// void Adafruit_SPITFT::swapBytes(uint16_t *src, uint32_t len, uint16_t *dest) {
+// void TFT_SPI::swapBytes(uint16_t *src, uint32_t len, uint16_t *dest) {
 //   if (!dest)
 //     dest = src; // NULL -> overwrite src buffer
 //   for (uint32_t i = 0; i < len; i++) {
@@ -1293,7 +1308,7 @@ void Adafruit_SPITFT::drawPixel(int16_t x, int16_t y, uint16_t color) {
 //                        big-endian, this can save time here, ESPECIALLY if
 //                        using this function's non-blocking DMA mode.
 // */
-// void Adafruit_SPITFT::drawPixels(uint16_t *colors, uint32_t len, bool block,
+// void TFT_SPI::drawPixels(uint16_t *colors, uint32_t len, bool block,
 //                                   bool bigEndian) {
 
 //   if (!len)
@@ -1457,7 +1472,7 @@ void Adafruit_SPITFT::drawPixel(int16_t x, int16_t y, uint16_t color) {
 //             is not enabled, and is not needed if blocking drawPixels()
 //             was used (as is the default case).
 // */
-// void Adafruit_SPITFT::dmaWait(void) {
+// void TFT_SPI::dmaWait(void) {
 // #if defined(USE_SPI_DMA) && (defined(__SAMD51__) || defined(ARDUINO_SAMD_ZERO))
 //   while (dma_busy)
 //     ;
@@ -1477,7 +1492,7 @@ void Adafruit_SPITFT::drawPixel(int16_t x, int16_t y, uint16_t color) {
 //             is not enabled.
 //     @return true if DMA is enabled and transmitting data, false otherwise.
 // */
-// bool Adafruit_SPITFT::dmaBusy(void) const {
+// bool TFT_SPI::dmaBusy(void) const {
 // #if defined(USE_SPI_DMA) && (defined(__SAMD51__) || defined(ARDUINO_SAMD_ZERO))
 //   return dma_busy;
 // #else
@@ -1491,7 +1506,7 @@ void Adafruit_SPITFT::drawPixel(int16_t x, int16_t y, uint16_t color) {
     @param  color  16-bit pixel color in '565' RGB format.
     @param  len    Number of pixels to draw.
 */
-// void Adafruit_SPITFT::writeColor(uint16_t color, uint32_t len) {
+// void TFT_SPI::writeColor(uint16_t color, uint32_t len) {
 
 //   if (!len)
 //     return; // Avoid 0-byte transfers
@@ -1787,7 +1802,7 @@ void Adafruit_SPITFT::drawPixel(int16_t x, int16_t y, uint16_t color) {
             optimize for the 'if' case, not the 'else' -- avoids branches
             and rejects clipped rectangles at the least-work possibility.
 */
-void Adafruit_SPITFT::writeFillRect(int16_t x, int16_t y, int16_t w, int16_t h,
+void TFT_SPI::writeFillRect(int16_t x, int16_t y, int16_t w, int16_t h,
                                     uint16_t color) {
   if (w && h) {   // Nonzero width and height?
     if (w < 0) {  // If negative width...
@@ -1839,7 +1854,7 @@ void Adafruit_SPITFT::writeFillRect(int16_t x, int16_t y, int16_t w, int16_t h,
                    negative = point of first corner).
     @param  color  16-bit line color in '565' RGB format.
 */
-void inline Adafruit_SPITFT::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) {
+void inline TFT_SPI::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) {
   if(x<0 ||x>=_width || y<0 || y>=_height) return;
   setAddrWindow(x, y, x+w-1, y);
 
@@ -1861,7 +1876,7 @@ void inline Adafruit_SPITFT::drawFastHLine(int16_t x, int16_t y, int16_t w, uint
                    negative = above first point).
     @param  color  16-bit line color in '565' RGB format.
 */
-void inline Adafruit_SPITFT::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) {
+void inline TFT_SPI::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) {
   if(x<0 ||x>=_width || y<0 || y>=_height) return;
   setAddrWindow(x, y, x, y+h-1);
 
@@ -1891,7 +1906,7 @@ void inline Adafruit_SPITFT::drawFastVLine(int16_t x, int16_t y, int16_t h, uint
     @note   This is a new function, no graphics primitives besides rects
             and horizontal/vertical lines are written to best use this yet.
 */
-inline void Adafruit_SPITFT::writeFillRectPreclipped(int16_t x, int16_t y,
+inline void TFT_SPI::writeFillRectPreclipped(int16_t x, int16_t y,
                                                      int16_t w, int16_t h,
                                                      uint16_t color) {
   setAddrWindow(x, y, w, h);
@@ -1904,12 +1919,12 @@ inline void Adafruit_SPITFT::writeFillRectPreclipped(int16_t x, int16_t y,
 
 
 // ----------------------------------------------------------
-void Adafruit_SPITFT::fillScreen(uint16_t color) {
+void TFT_SPI::fillScreen(uint16_t color) {
   fillRect(0, 0,  _width, _height, color);
 }
 
 // ----------------------------------------------------------
-void Adafruit_SPITFT::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
+void TFT_SPI::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
   if(x<0 ||x>=_width || y<0 || y>=_height) return;
   setAddrWindow(x, y, x+w-1, y+h-1);
 
@@ -1941,7 +1956,7 @@ void Adafruit_SPITFT::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint1
 //     @param  y      Vertical position   (0 = top).
 //     @param  color  16-bit pixel color in '565' RGB format.
 // */
-// void Adafruit_SPITFT::drawPixel(int16_t x, int16_t y, uint16_t color) {
+// void TFT_SPI::drawPixel(int16_t x, int16_t y, uint16_t color) {
 //   // Clip first...
 //   if ((x >= 0) && (x < _width) && (y >= 0) && (y < _height)) {
 //     // THEN set up transaction (if needed) and draw...
@@ -1971,7 +1986,7 @@ void Adafruit_SPITFT::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint1
 //             performed at all if the rectangle is rejected. It's really not
 //             that much code.
 // */
-// void Adafruit_SPITFT::fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
+// void TFT_SPI::fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
 //                                uint16_t color) {
 //   if (w && h) {   // Nonzero width and height?
 //     if (w < 0) {  // If negative width...
@@ -2029,7 +2044,7 @@ void Adafruit_SPITFT::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint1
 //             drawFastHLine() to handle clipping and so forth) so that the
 //             transaction isn't performed at all if the line is rejected.
 // */
-// void Adafruit_SPITFT::drawFastHLine(int16_t x, int16_t y, int16_t w,
+// void TFT_SPI::drawFastHLine(int16_t x, int16_t y, int16_t w,
 //                                     uint16_t color) {
 //   if ((y >= 0) && (y < _height) && w) { // Y on screen, nonzero width
 //     if (w < 0) {                        // If negative width...
@@ -2070,7 +2085,7 @@ void Adafruit_SPITFT::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint1
 //             drawFastVLine() to handle clipping and so forth) so that the
 //             transaction isn't performed at all if the line is rejected.
 // */
-// void Adafruit_SPITFT::drawFastVLine(int16_t x, int16_t y, int16_t h,
+// void TFT_SPI::drawFastVLine(int16_t x, int16_t y, int16_t h,
 //                                     uint16_t color) {
 //   if ((x >= 0) && (x < _width) && h) { // X on screen, nonzero height
 //     if (h < 0) {                       // If negative height...
@@ -2103,7 +2118,7 @@ void Adafruit_SPITFT::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint1
             any user code relies on it. Consider it DEPRECATED.
     @param  color  16-bit pixel color in '565' RGB format.
 */
-void Adafruit_SPITFT::pushColor(uint16_t color) {
+void TFT_SPI::pushColor(uint16_t color) {
   SPI_START();
   DC_DATA();
   CS_ACTIVE();
@@ -2130,7 +2145,7 @@ void Adafruit_SPITFT::pushColor(uint16_t color) {
     @param  w        Width of bitmap in pixels.
     @param  h        Height of bitmap in pixels.
 */
-void Adafruit_SPITFT::drawRGBBitmap(int16_t x, int16_t y, uint16_t *pcolors,
+void TFT_SPI::drawRGBBitmap(int16_t x, int16_t y, uint16_t *pcolors,
                                     int16_t w, int16_t h) {
 
   // all protections should be on the application side
@@ -2151,7 +2166,7 @@ void Adafruit_SPITFT::drawRGBBitmap(int16_t x, int16_t y, uint16_t *pcolors,
             Self-contained, no transaction setup required.
     @param  mode  true = inverted display, false = normal display.
 */
-void Adafruit_SPITFT::invertDisplay(bool mode) {
+void TFT_SPI::invertDisplay(bool mode) {
   writeCommand(mode ? invertOnCommand : invertOffCommand);
 }
 
@@ -2165,7 +2180,7 @@ void Adafruit_SPITFT::invertDisplay(bool mode) {
     @param   blue   8-bit blue brightnesss (0 = off, 255 = max).
     @return  'Packed' 16-bit color value (565 format).
 */
-uint16_t Adafruit_SPITFT::color565(uint8_t red, uint8_t green, uint8_t blue) {
+uint16_t TFT_SPI::color565(uint8_t red, uint8_t green, uint8_t blue) {
   return ((red & 0xF8) << 8) | ((green & 0xFC) << 3) | (blue >> 3);
 }
 
@@ -2178,7 +2193,7 @@ uint16_t Adafruit_SPITFT::color565(uint8_t red, uint8_t green, uint8_t blue) {
       @param   dataBytes  A pointer to the Data bytes to send
       @param   numBytes  The number of bytes we should send
 */
-void Adafruit_SPITFT::sendCommand(uint8_t cmd, const uint8_t *dataBytes, uint8_t numBytes) {
+void TFT_SPI::sendCommand(uint8_t cmd, const uint8_t *dataBytes, uint8_t numBytes) {
   DC_COMMAND();   // Set Command input mode.
   writeSPI(cmd);  // Execute the command input.
 
@@ -2202,7 +2217,7 @@ void Adafruit_SPITFT::sendCommand(uint8_t cmd, const uint8_t *dataBytes, uint8_t
     @param   index The byte index into the command to read from.
     @return  Unsigned 8-bit data read from display register.
  */
-uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
+uint8_t TFT_SPI::readcommand8(uint8_t commandByte, uint8_t index) {
   DC_COMMAND();           // Set Command input mode.
   writeSPI(commandByte);
 
@@ -2217,13 +2232,13 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
 }
 
 // /*!
-//  @brief   Adafruit_SPITFT Send Command handles complete sending of commands and
+//  @brief   TFT_SPI Send Command handles complete sending of commands and
 //  data
 //  @param   commandByte       The Command Byte
 //  @param   dataBytes         A pointer to the Data bytes to send
 //  @param   numDataBytes      The number of bytes we should send
 //  */
-// void Adafruit_SPITFT::sendCommand(uint8_t commandByte, const uint8_t *dataBytes,
+// void TFT_SPI::sendCommand(uint8_t commandByte, const uint8_t *dataBytes,
 //                                   uint8_t numDataBytes) {
 //   SPI_BEGIN_TRANSACTION();
 //   if (_cs >= 0)
@@ -2248,7 +2263,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
 // }
 
 // /*!
-//  @brief  Adafruit_SPITFT sendCommand16 handles complete sending of
+//  @brief  TFT_SPI sendCommand16 handles complete sending of
 //          commands and data for 16-bit parallel displays. Currently somewhat
 //          rigged for the NT35510, which has the odd behavior of wanting
 //          commands 16-bit, but subsequent data as 8-bit values, despite
@@ -2258,7 +2273,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
 //  @param  dataBytes     A pointer to the data bytes to send
 //  @param  numDataBytes  The number of bytes we should send
 //  */
-// void Adafruit_SPITFT::sendCommand16(uint16_t commandWord,
+// void TFT_SPI::sendCommand16(uint16_t commandWord,
 //                                     const uint8_t *dataBytes,
 //                                     uint8_t numDataBytes) {
 //   SPI_BEGIN_TRANSACTION();
@@ -2291,7 +2306,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
 //  @param   addr  Command/register to access.
 //  @return  Unsigned 16-bit data.
 //  */
-// uint16_t Adafruit_SPITFT::readcommand16(uint16_t addr) {
+// uint16_t TFT_SPI::readcommand16(uint16_t addr) {
 // // #if defined(USE_FAST_PINIO) // NOT SUPPORTED without USE_FAST_PINIO
 // //   uint16_t result = 0;
 // //   if ((connection == TFT_PARALLEL) && tft8.wide) {
@@ -2333,7 +2348,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
 //             chip-select operation -- see startWrite() for a function that
 //             encapsulated both actions.
 // */
-// inline void Adafruit_SPITFT::SPI_BEGIN_TRANSACTION(void) {
+// inline void TFT_SPI::SPI_BEGIN_TRANSACTION(void) {
 //   if (connection == TFT_HARD_SPI) {
 // #if defined(SPI_HAS_TRANSACTION)
 //     hwspi._spi->beginTransaction(hwspi.settings);
@@ -2361,7 +2376,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
 //             NOT include a chip-deselect operation -- see endWrite() for a
 //             function that encapsulated both actions.
 // */
-// inline void Adafruit_SPITFT::SPI_END_TRANSACTION(void) {
+// inline void TFT_SPI::SPI_END_TRANSACTION(void) {
 // #if defined(SPI_HAS_TRANSACTION)
 //   if (connection == TFT_HARD_SPI) {
 //     hwspi._spi->endTransaction();
@@ -2378,7 +2393,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
 //             This function is used even if display connection is parallel.
 //     @param  b  8-bit value to write.
 // */
-// void Adafruit_SPITFT::spiWrite(uint8_t b) {
+// void TFT_SPI::spiWrite(uint8_t b) {
 // //   if (connection == TFT_HARD_SPI) {
 // // #if defined(ARDUINO_ARCH_AVR)
 //     AVR_WRITESPI(b);
@@ -2421,7 +2436,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
 //             function -- just use spiWrite().
 //     @param  cmd  8-bit command to write.
 // */
-// void Adafruit_SPITFT::writeCommand(uint8_t cmd) {
+// void TFT_SPI::writeCommand(uint8_t cmd) {
 //   SPI_DC_LOW();
 //   spiWrite(cmd);
 //   SPI_DC_HIGH();
@@ -2437,7 +2452,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
 //     @return  Unsigned 8-bit value read (always zero if USE_FAST_PINIO is
 //              not supported by the MCU architecture).
 // */
-// uint8_t Adafruit_SPITFT::spiRead(void) {
+// uint8_t TFT_SPI::spiRead(void) {
 //   uint8_t b = 0;
 //   uint16_t w = 0;
 //   // if (connection == TFT_HARD_SPI) {
@@ -2500,7 +2515,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
 //             Thus operates ONLY on 'wide' (16-bit) parallel displays!
 //     @param  w  16-bit value to write.
 // */
-// void Adafruit_SPITFT::write16(uint16_t w) {
+// void TFT_SPI::write16(uint16_t w) {
 //   if (connection == TFT_PARALLEL) {
 // // #if defined(USE_FAST_PINIO)
 // //     if (tft8.wide)
@@ -2520,7 +2535,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
 //             displays!
 //     @param  cmd  16-bit command to write.
 // */
-// void Adafruit_SPITFT::writeCommand16(uint16_t cmd) {
+// void TFT_SPI::writeCommand16(uint16_t cmd) {
 //   SPI_DC_LOW();
 //   write16(cmd);
 //   SPI_DC_HIGH();
@@ -2534,7 +2549,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
     @return  Unsigned 16-bit value read (always zero if USE_FAST_PINIO is
              not supported by the MCU architecture).
 */
-// uint16_t Adafruit_SPITFT::read16(void) {
+// uint16_t TFT_SPI::read16(void) {
 //   uint16_t w = 0;
 //   // if (connection == TFT_PARALLEL) {
 //     // if (tft8._rd >= 0) {
@@ -2563,7 +2578,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
 // /*!
 //     @brief  Set the software (bitbang) SPI MOSI line HIGH.
 // */
-// inline void Adafruit_SPITFT::SPI_MOSI_HIGH(void) {
+// inline void TFT_SPI::SPI_MOSI_HIGH(void) {
 // // #if defined(USE_FAST_PINIO)
 // // #if defined(HAS_PORT_SET_CLR)
 // // #if defined(KINETISK)
@@ -2582,7 +2597,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
 // /*!
 //     @brief  Set the software (bitbang) SPI MOSI line LOW.
 // */
-// inline void Adafruit_SPITFT::SPI_MOSI_LOW(void) {
+// inline void TFT_SPI::SPI_MOSI_LOW(void) {
 // // #if defined(USE_FAST_PINIO)
 // // #if defined(HAS_PORT_SET_CLR)
 // // #if defined(KINETISK)
@@ -2601,7 +2616,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
 // /*!
 //     @brief  Set the software (bitbang) SPI SCK line HIGH.
 // */
-// inline void Adafruit_SPITFT::SPI_SCK_HIGH(void) {
+// inline void TFT_SPI::SPI_SCK_HIGH(void) {
 // // #if defined(USE_FAST_PINIO)
 // // #if defined(HAS_PORT_SET_CLR)
 // // #if defined(KINETISK)
@@ -2620,7 +2635,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
 // /*!
 //     @brief  Set the software (bitbang) SPI SCK line LOW.
 // */
-// inline void Adafruit_SPITFT::SPI_SCK_LOW(void) {
+// inline void TFT_SPI::SPI_SCK_LOW(void) {
 // // #if defined(USE_FAST_PINIO)
 // // #if defined(HAS_PORT_SET_CLR)
 // // #if defined(KINETISK)
@@ -2640,7 +2655,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
 //     @brief   Read the state of the software (bitbang) SPI MISO line.
 //     @return  true if HIGH, false if LOW.
 // */
-// inline bool Adafruit_SPITFT::SPI_MISO_READ(void) {
+// inline bool TFT_SPI::SPI_MISO_READ(void) {
 // // #if defined(USE_FAST_PINIO)
 // // #if defined(KINETISK)
 // //   return *swspi.misoPort;
@@ -2662,7 +2677,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
             that. Again, staying compatible with outside code.
     @param  w  16-bit value to write.
 */
-// void Adafruit_SPITFT::SPI_WRITE16(uint16_t w) {
+// void TFT_SPI::SPI_WRITE16(uint16_t w) {
 //   // if (connection == TFT_HARD_SPI) {
 // // #if defined(ARDUINO_ARCH_AVR)
 //     AVR_WRITESPI(w >> 8);
@@ -2716,7 +2731,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
             Sorry about that. Again, staying compatible with outside code.
     @param  l  32-bit value to write.
 */
-// void Adafruit_SPITFT::SPI_WRITE32(uint32_t l) {
+// void TFT_SPI::SPI_WRITE32(uint32_t l) {
 // //   if (connection == TFT_HARD_SPI) {
 // // #if defined(ARDUINO_ARCH_AVR)
 //     AVR_WRITESPI(l >> 24);
@@ -2777,7 +2792,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
 //     @brief  Set the WR line LOW, then HIGH. Used for parallel-connected
 //             interfaces when writing data.
 // */
-// inline void Adafruit_SPITFT::TFT_WR_STROBE(void) {
+// inline void TFT_SPI::TFT_WR_STROBE(void) {
 // // #if defined(USE_FAST_PINIO)
 // // #if defined(HAS_PORT_SET_CLR)
 // // #if defined(KINETISK)
@@ -2801,7 +2816,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
 //     @brief  Set the RD line HIGH. Used for parallel-connected interfaces
 //             when reading data.
 // */
-// inline void Adafruit_SPITFT::TFT_RD_HIGH(void) {
+// inline void TFT_SPI::TFT_RD_HIGH(void) {
 // // #if defined(USE_FAST_PINIO)
 // // #if defined(HAS_PORT_SET_CLR)
 // //   *tft8.rdPortSet = tft8.rdPinMask;
@@ -2817,7 +2832,7 @@ uint8_t Adafruit_SPITFT::readcommand8(uint8_t commandByte, uint8_t index) {
 //     @brief  Set the RD line LOW. Used for parallel-connected interfaces
 //             when reading data.
 // */
-// inline void Adafruit_SPITFT::TFT_RD_LOW(void) {
+// inline void TFT_SPI::TFT_RD_LOW(void) {
 // // #if defined(USE_FAST_PINIO)
 // // #if defined(HAS_PORT_SET_CLR)
 // //   *tft8.rdPortClr = tft8.rdPinMask;

@@ -56,14 +56,6 @@
 #define SPI_DEFAULT_FREQ 16000000 ///< Default SPI data clock frequency
 #endif
 
-#define MADCTL_MY 0x80  ///< Bottom to top
-#define MADCTL_MX 0x40  ///< Right to left
-#define MADCTL_MV 0x20  ///< Reverse Mode
-#define MADCTL_ML 0x10  ///< LCD refresh Bottom to top
-#define MADCTL_RGB 0x00 ///< Red-Green-Blue pixel order
-#define MADCTL_BGR 0x08 ///< Blue-Green-Red pixel order
-#define MADCTL_MH 0x04  ///< LCD refresh right to left
-
 #define SPI_INTERFACES_COUNT 1
 
 /**************************************************************************/
@@ -83,6 +75,7 @@ AVR_ILI9341::AVR_ILI9341(int8_t cs, int8_t dc, int8_t rst)
 // TFT LCD(ILI9341V) startup configuration is available here: 
 // http://www.lcdwiki.com/res/MSP2833_MSP2834/ILI9341V_Init.txt
 static const uint8_t PROGMEM initcmd[] = {
+  ILI9341_SWRESET, 1, 0, // Software reset
   // ILI9341_CMD_EF, 3, 0x03, 0x80, 0x02,
   ILI9341_CMD_CF, 3, 0x00, 0xC1, 0x30,
   ILI9341_POWSEQ, 4, 0x64, 0x03, 0x12, 0x81,
@@ -95,7 +88,7 @@ static const uint8_t PROGMEM initcmd[] = {
   ILI9341_VMCTR1, 2, 0x1C, 0x35,       // VCM control
   ILI9341_VMCTR2, 1, 0xBD,             // VCM control2
   ILI9341_INVON, 1,  0,                // Display Inversion ON: Invert colors
-  ILI9341_MADCTL, 1, 0x08,             // Memory Access Control
+  ILI9341_MADCTL, 1, 0x48,             // Memory Access Control
   // ILI9341_VSCRSADD, 1, 0x00,        // Vertical scroll zero
   ILI9341_DFUNCTR, 2, 0x0A, 0xA2,
   ILI9341_PIXFMT, 1, 0x55,             //*** INTERFACE PIXEL FORMAT: 0x66 -> 18 bit; 0x55 -> 16 bit    
@@ -141,7 +134,8 @@ void AVR_ILI9341::begin(uint32_t freq) {
 
   while ((cmd = pgm_read_byte(addr++)) > 0) {
     // Before Display-On cmd execution there should be a delay for CMD_DELAY.
-    if (cmd == ILI9341_DISPON) {
+    // Also after software reset wait for all the display to load parameters.
+    if (cmd == ILI9341_DISPON || cmd == ILI9341_CMD_CF) {
         delay(CMD_DELAY);
     }
 

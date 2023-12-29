@@ -94,6 +94,14 @@
   0xB3 ///< Frame Rate control (In Partial Mode/Full Colors)
 #define ILI9341_INVCTR 0xB4  ///< Display Inversion Control
 #define ILI9341_DFUNCTR 0xB6 ///< Display Function Control
+#define ILI9341_BCKCTR1 0xB8 ///< Backlight Control 1
+#define ILI9341_BCKCTR1 0xB9 ///< Backlight Control 2
+#define ILI9341_BCKCTR1 0xBA ///< Backlight Control 3
+#define ILI9341_BCKCTR1 0xBB ///< Backlight Control 4
+#define ILI9341_BCKCTR1 0xBC ///< Backlight Control 5
+#define ILI9341_BCKCTR1 0xBD ///< Backlight Control 6
+#define ILI9341_BCKCTR1 0xBE ///< Backlight Control 7
+#define ILI9341_BCKCTR1 0xBF ///< Backlight Control 8
 
 #define ILI9341_PWCTR1 0xC0 ///< Power Control 1
 #define ILI9341_PWCTR2 0xC1 ///< Power Control 2
@@ -124,6 +132,14 @@
 
 #define CMD_DELAY   0x78  ///< 120ms
 //#define ILI9341_PWCTR6     0xFC
+
+#define MADCTL_MY 0x80  ///< Bottom to top
+#define MADCTL_MX 0x40  ///< Right to left
+#define MADCTL_MV 0x20  ///< Reverse Mode
+#define MADCTL_ML 0x10  ///< LCD refresh Bottom to top
+#define MADCTL_RGB 0x00 ///< Red-Green-Blue pixel order
+#define MADCTL_BGR 0x08 ///< Blue-Green-Red pixel order
+#define MADCTL_MH 0x04  ///< LCD refresh right to left
 
 // Color definitions
 #define ILI9341_BLACK 0x0000       ///<   0,   0,   0
