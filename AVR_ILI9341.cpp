@@ -53,12 +53,11 @@ static const uint8_t PROGMEM initcmd[] = {
   ILI9341_PWCTR2, 1, 0x10,             // Power control SAP[2:0];BT[3:0]
   ILI9341_VMCTR1, 2, 0x3E, 0x28,       // VCM control - Contrast
   ILI9341_VMCTR2, 1, 0x86,             // VCM control2
-  ILI9341_MADCTL, 1, 0x08,             // Memory Access Control
-  ILI9341_PIXFMT, 1, 0x55,             //*** INTERFACE PIXEL FORMAT: 0x66 -> 18 bit; 0x55 -> 16 bit    
-  ILI9341_FRMCTR1, 2, 0x00, 0x1B,         // VCM Control
+  ILI9341_MADCTL, 1, 0x48,             // Memory Access Control
+  ILI9341_PIXFMT, 1, 0x55,             // INTERFACE PIXEL FORMAT: 0x66 -> 18 bit; 0x55 -> 16 bit    
+  ILI9341_FRMCTR1, 2, 0x00, 0x18,         // VCM Control
   ILI9341_DFUNCTR, 3, 0x08, 0x82, 0x27, // Display Function Control
   ILI9341_INTFCTR, 2, 0x01, 0x30,       // Interface Control //MCU
-  ILI9341_INVON, 1,  0,                // Display Inversion ON: Invert colors
   ILI9341_EN3GAM, 1, 0x00,                         // 3Gamma Function Disable
   ILI9341_GAMMASET, 1, 0x01,             // Gamma curve selected
   ILI9341_GMCTRP1, 15, 0x0F, 0x35, 0x31, 0x0B, 0x0E, 0x06, 0x49, 0xA7, 0x33, \
@@ -86,7 +85,7 @@ void AVR_ILI9341::begin(uint32_t freq) {
 
   while ((cmd = pgm_read_byte(addr++)) > 0) {
     // Before Display-On cmd execution there should be a delay for CMD_DELAY.
-    if (cmd == ILI9341_DISPON ) {
+    if (cmd == ILI9341_DISPON) {
       delay(CMD_DELAY);
     }
 
@@ -172,7 +171,7 @@ void AVR_ILI9341::setScrollMargins(uint16_t top, uint16_t bottom) {
 /*!
     @brief   Sets the "address window" - the rectangle we will write to RAM with
               the next chunk of SPI data writes. The ILI9341 will automatically
-              wrap the data as each row is filled. 
+              wrap the data as each row is filled.
     @param   x1  TFT memory 'x' axis origin. Also display's Start Column (SC)
     @param   y1  TFT memory 'y' axis origin. Also display's Start Page (SP)
     @param   x2  TFT memory 'x' axis end point. Also display's End Column (EC)
@@ -192,12 +191,12 @@ void AVR_ILI9341::setAddressWindow(uint16_t x1, uint16_t y1, uint16_t x2,
   writeData16(y1, 1);
   writeData16(y2, 1);
 
-  writeCommand(ILI9341_RAMWR); // Data memory write command.
+  writeCommand(ILI9341_RAMWR);  // Data memory write command.
 }
 
 /*!
-    @brief  Reads 8 bits of data from ILI9341 configuration memory. 
-            NOT from RAM! This is highly undocumented/supported, it's 
+    @brief  Reads 8 bits of data from ILI9341 configuration memory.
+            NOT from RAM! This is highly undocumented/supported, it's
             really a hack but kinda works?
     @param    commandByte  The command register to read data from
     @param    index  The byte index into the command to read from
