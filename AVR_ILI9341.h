@@ -80,13 +80,13 @@
 #define ILI9341_INVCTR 0xB4  ///< Display Inversion Control
 #define ILI9341_DFUNCTR 0xB6 ///< Display Function Control
 #define ILI9341_BCKCTR1 0xB8 ///< Backlight Control 1
-#define ILI9341_BCKCTR1 0xB9 ///< Backlight Control 2
-#define ILI9341_BCKCTR1 0xBA ///< Backlight Control 3
-#define ILI9341_BCKCTR1 0xBB ///< Backlight Control 4
-#define ILI9341_BCKCTR1 0xBC ///< Backlight Control 5
-#define ILI9341_BCKCTR1 0xBD ///< Backlight Control 6
-#define ILI9341_BCKCTR1 0xBE ///< Backlight Control 7
-#define ILI9341_BCKCTR1 0xBF ///< Backlight Control 8
+#define ILI9341_BCKCTR2 0xB9 ///< Backlight Control 2
+#define ILI9341_BCKCTR3 0xBA ///< Backlight Control 3
+#define ILI9341_BCKCTR4 0xBB ///< Backlight Control 4
+#define ILI9341_BCKCTR5 0xBC ///< Backlight Control 5
+#define ILI9341_BCKCTR6 0xBD ///< Backlight Control 6
+#define ILI9341_BCKCTR7 0xBE ///< Backlight Control 7
+#define ILI9341_BCKCTR8 0xBF ///< Backlight Control 8
 
 #define ILI9341_PWCTR1 0xC0 ///< Power Control 1
 #define ILI9341_PWCTR2 0xC1 ///< Power Control 2

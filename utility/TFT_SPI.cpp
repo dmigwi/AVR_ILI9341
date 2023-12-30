@@ -199,7 +199,7 @@ void TFT_SPI::writeData16(uint16_t color, uint32_t num) {
     @param  num   Number of pixels to draw.
     @note This is a fast method to send multiple 16-bit values from RAM via SPI
 */
-inline void TFT_SPI::writeImage(uint8_t *img, uint16_t num) {
+void TFT_SPI::writeImage(uint8_t *img, uint16_t num) {
   digitalWrite(_dc, HIGH);
 
   while (num > 0) {
@@ -240,16 +240,25 @@ void TFT_SPI::drawPixel(int16_t x, int16_t y, uint16_t color) {
             and rejection.
     @param  x      Horizontal position of first point.
     @param  y      Vertical position of first point.
-    @param  w      Line width in pixels (positive = right of first point,
-                   negative = point of first corner).
+    @param  wh      Line width/length in pixels (positive = right of first
+   point, negative = point of first corner).
     @param  color  16-bit line color in '565' RGB format.
 */
-void inline TFT_SPI::drawLine(int16_t x, int16_t y, int16_t w, lineType line,
+void TFT_SPI::drawLine(int16_t x, int16_t y, int16_t wh, lineType line,
                               uint16_t color) {
   if (x < 0 || x >= _width || y < 0 || y >= _height) return;
-  setAddressWindow(x, y, x + w - 1, y);
 
-  writeData16(color, w);
+  switch (line) {
+    case Horizontal:  // Horizontal Line
+      setAddressWindow(x, y, x + wh - 1, y);
+      break;
+
+    default:          // Vertical Line
+      setAddressWindow(x, y, x, y + wh - 1);
+      break;
+  }
+
+  writeData16(color, wh*2);
 
   SPI_END();
 }
@@ -362,7 +371,7 @@ void TFT_SPI::sendCommand(uint8_t cmd, const uint8_t *dataBytes,
 uint8_t TFT_SPI::readcommand8(uint8_t commandByte, uint8_t index) {
   writeCommand(commandByte);
 
-  pinMode(_dc, HIGH);  // Data Mode
+  pinMode(_dc, HIGH);  // Data Mode; should not be used often.
   uint8_t result;
 
   do {
