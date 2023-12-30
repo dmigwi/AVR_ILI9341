@@ -18,7 +18,7 @@
  *
  * Originally written by Limor "ladyada" Fried for Adafruit Industries,
  * with contributions from the open source community.
- * Improved by dmigwi (Daniel Migwi)
+ * Improved by dmigwi (Daniel Migwi)  @2023
  *
  *  @section license License
  *
@@ -312,15 +312,6 @@ void TFT_SPI::drawImage(int16_t x, int16_t y, uint16_t *pcolors, int16_t w,
 
 // -------------------------------------------------------------------------
 // Miscellaneous class member functions that don't draw anything.
-
-/*!
-    @brief  Invert the colors of the display (if supported by hardware).
-            Self-contained, no transaction setup required.
-    @param  mode  true = inverted display, false = normal display.
-*/
-void TFT_SPI::invertDisplay(bool mode) {
-  writeCommand(mode ? invertOnCommand : invertOffCommand);
-}
 
 /*!
     @brief   Given 8-bit red, green and blue values, return a 'packed'

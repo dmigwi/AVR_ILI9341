@@ -1,43 +1,28 @@
-// See rights and use declaration in license.txt
-// This was originally Adafruit_ILI9341 library but has been modified(optimised) for the AVR (Leonardo and Mega) arduino boards.
-// The hardware SPI pins are used for communication with the screen.
-// @dmigwi 2023
-//
-// BSD license as below and no warranty terms applies
-
 /*!
- * @file Adafruit_ILI9341.h
+ * @file AVR_ILI9341.h (Originally Adafruit_ILI9341.h)
  *
- * This is the documentation for Adafruit's ILI9341 driver for the
- * Arduino platform.
+ * @section Introduction
  *
- * This library works with the Adafruit 2.8" Touch Shield V2 (SPI)
- *    http://www.adafruit.com/products/1651
- * Adafruit 2.4" TFT LCD with Touchscreen Breakout w/MicroSD Socket - ILI9341
- *    https://www.adafruit.com/product/2478
- * 2.8" TFT LCD with Touchscreen Breakout Board w/MicroSD Socket - ILI9341
- *    https://www.adafruit.com/product/1770
- * 2.2" 18-bit color TFT LCD display with microSD card breakout - ILI9340
- *    https://www.adafruit.com/product/1770
- * TFT FeatherWing - 2.4" 320x240 Touchscreen For All Feathers
- *    https://www.adafruit.com/product/3315
+ * This file is part AVR_ILI9341 library package files. It is an implementation
+ * of the TFT Display using the chipset ILI9341V and been optimised mainly
+ * for Leonardo and Mega 2560 boards. It may work with other AVR boards but
+ * that cannot be guaranteed.
  *
- * These displays use SPI to communicate, 4 or 5 pins are required
- * to interface (RST is optional).
- *
- * Adafruit invests time and resources providing this open source code,
- * please support Adafruit and open-source hardware by purchasing
- * products from Adafruit!
- *
+ *  @section dependencies Dependencies
  *
  * This library depends on <a href="https://github.com/adafruit/Adafruit_GFX">
  * Adafruit_GFX</a> being present on your system. Please make sure you have
  * installed the latest version before using this library.
  *
- * Written by Limor "ladyada" Fried for Adafruit Industries.
+ * @section author Author
+ *
+ * Originally written by Limor "ladyada" Fried for Adafruit Industries,
+ * with contributions from the open source community.
+ * Improved by dmigwi (Daniel Migwi) @2023
+ *
+ *  @section license License
  *
  * BSD license, all text here must be included in any redistribution.
- *
  */
 
 
@@ -49,7 +34,7 @@
 #include <Adafruit_I2CDevice.h>
 #include <Adafruit_SPIDevice.h>
 #include "utility/Adafruit_GFX.h"
-#include "utility/Adafruit_SPITFT.h"
+#include "utility/TFT_SPI.h"
 
 #define ILI9341_TFTWIDTH 240  ///< ILI9341 max TFT width
 #define ILI9341_TFTHEIGHT 320 ///< ILI9341 max TFT height
@@ -162,14 +147,12 @@
 #define ILI9341_GREENYELLOW 0xAFE5 ///< 173, 255,  41
 #define ILI9341_PINK 0xFC18        ///< 255, 130, 198
 
-/**************************************************************************/
-/*!
-@brief Class to manage hardware interface with ILI9341 chipset (also seems to
-work with ILI9340)
-*/
-/**************************************************************************/
 
-class AVR_ILI9341 : public Adafruit_SPITFT {
+/*!
+  @brief Class to manage hardware interface with ILI9341 chipset 
+        (also seems to work with ILI9340)
+*/
+class AVR_ILI9341 : public TFT_SPI {
 public:
   AVR_ILI9341(int8_t _CS, int8_t _DC, int8_t _RST = -1);
 
@@ -177,14 +160,13 @@ public:
 
   void begin(uint32_t freq = 0);
   void setRotation(uint8_t r);
-  void invertDisplay(bool i);
   void scrollTo(uint16_t y);
   void setScrollMargins(uint16_t top, uint16_t bottom);
-
-  // Transaction API not used by GFX
-  void setAddrWindow(int16_t x, int16_t y, int16_t w, int16_t h);
-
   uint8_t readcommand(uint8_t reg, uint8_t index = 0);
+
+private:
+  // Transaction API not used by GFX
+  void setAddressWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
 };
 
 #endif // _AVR_ILI9341H_

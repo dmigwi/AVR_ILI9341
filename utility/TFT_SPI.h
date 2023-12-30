@@ -18,7 +18,7 @@
  *
  * Originally written by Limor "ladyada" Fried for Adafruit Industries,
  * with contributions from the open source community.
- * Improved by dmigwi (Daniel Migwi)
+ * Improved by dmigwi (Daniel Migwi)  @2023
  *
  *  @section license License
  *
@@ -91,14 +91,12 @@ class TFT_SPI : public Adafruit_GFX {
   void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
   void drawImage(int16_t x, int16_t y, uint16_t *pcolors, int16_t w, int16_t h);
 
-  void invertDisplay(bool mode);
-  uint16_t TFT_SPI::color565(uint8_t red, uint8_t green, uint8_t blue);
-
   void writeData(uint8_t data);    // Write single byte as DATA
   void writeCommand(uint8_t cmd);  // Write single byte as Command
   void writeData16(uint16_t color, uint32_t len); // Writes 16 bit for provided counts.
 
   void writeImage(uint8_t *img, uint16_t num);  // Writes image efficiently
+  uint16_t TFT_SPI::color565(uint8_t red, uint8_t green, uint8_t blue);
 
  private:
   // PRIVATE CLASS MEMBER FUNCTIONS
@@ -125,7 +123,7 @@ class TFT_SPI : public Adafruit_GFX {
       @param  h  Height of area to be drawn, in pixels (MUST be >0 and,
                  added to x, within display bounds at current rotation).
   */
-  virtual void setAddressWindow(int16_t x, int16_t y, int16_t w, int16_t h) = 0;
+  virtual void setAddressWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h) = 0;
 
   void initSPI(uint32_t freq = 0, uint8_t spiMode = SPI_MODE0);
   void sendCommand(uint8_t cmd, const uint8_t *dataBytes, uint8_t numBytes);
@@ -156,8 +154,6 @@ class TFT_SPI : public Adafruit_GFX {
   int8_t _rst;         ///< Reset pin # (or -1)
   int8_t _cs;          ///< Chip select pin # (or -1)
   int8_t _dc;          ///< Data/command pin #
-  uint8_t invertOnCommand = 0;  ///< Command to enable invert mode
-  uint8_t invertOffCommand = 0; ///< Command to disable invert mode
 };
 
 #endif  // end _TFT_SPI_H_
