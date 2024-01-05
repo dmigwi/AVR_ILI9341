@@ -75,29 +75,26 @@ class TFT_SPI : public Adafruit_GFX {
 
   virtual ~TFT_SPI(){};
 
-  /*!
-        @brief Defines the various types of straight line primitives supported.
-  */
-  enum lineType { Horizontal, Vertical };
+  // /*!
+  //       @brief Defines the various types of straight line primitives supported.
+  // */
+  // enum lineType { Horizontal, Vertical };
 
   // PUBLIC CLASS MEMBER FUNCTIONS
   // ---------------------------------------------------------------------------
 
+  void drawScreen(uint16_t xAxis, int16_t yAxis, uint16_t width,
+                        uint16_t height, uint16_t *pcolors);
+                        
   // --drawPixel and drawline primitive function might be replaced with better
   // more efficient graphics display management primitives.--
-  void drawPixel(int16_t x, int16_t y, uint16_t color);
-  void drawLine(int16_t x, int16_t y, int16_t w, lineType line, uint16_t color);
+  // void drawPixel(int16_t x, int16_t y, uint16_t color);
+  // void drawLine(int16_t x, int16_t y, int16_t w, lineType line, uint16_t color);
 
-  void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
-  void drawImage(int16_t x, int16_t y, uint16_t *pcolors, int16_t w, int16_t h);
+  // void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
 
-  void writeData(uint8_t data);    // Write single byte as DATA
-  void writeCommand(uint8_t cmd);  // Write single byte as Command
-  void writeData16(uint16_t color,
-                   uint32_t len);  // Writes 16 bit for provided counts.
 
-  void writeImage(uint8_t *img, uint16_t num);  // Writes image efficiently
-  uint16_t color565(uint8_t red, uint8_t green, uint8_t blue);
+  // uint16_t color565(uint8_t red, uint8_t green, uint8_t blue);
 
  private:
   // PRIVATE CLASS MEMBER FUNCTIONS
@@ -126,6 +123,12 @@ class TFT_SPI : public Adafruit_GFX {
   */
   virtual void setAddressWindow(uint16_t x, uint16_t y, uint16_t w,
                                 uint16_t h) = 0;
+  void writeData(uint8_t data);    // Write single byte as DATA
+  void writeCommand(uint8_t cmd);  // Write single byte as Command
+  void writeData16(uint16_t color,
+                   uint32_t len);  // Writes 16 bit for provided counts.
+
+  void writeImage(uint8_t *img, uint16_t num);  // Writes image efficiently
 
   void initSPI(uint32_t freq = 0, uint8_t spiMode = SPI_MODE0);
   void sendCommand(uint8_t cmd, const uint8_t *dataBytes, uint8_t numBytes);
