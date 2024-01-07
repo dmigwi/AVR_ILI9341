@@ -21,7 +21,12 @@
 
 #include "TFT_GFX.h"
 
-TFT_GFX::TFT_GFX(uint16_t w, uint16_t h) {}
+#include <graphics.h>
+
+TFT_GFX::TFT_GFX(uint16_t w, uint16_t h) {
+    _width = w;
+    _height = h;
+}
 
 TFT_GFX::~TFT_GFX() {}
 
@@ -55,141 +60,157 @@ void TFT_GFX::drawShape(Shape sType, uint16_t xAxis, uint16_t yAxis,
                         uint16_t length, uint16_t breadth, uint16_t radius,
                         uint8_t strokeWidth, uint16_t strokeColor,
                         uint16_t fillColor) {
-  // If invalid x and y axis points used return;
-  if (xAxis >= _width - 1 || yAxis >= _width - 1) return;
-  
-  switch (sType) {
-    case Shape::Pixel:
-      drawPixel(xAxis, yAxis, breadth, fillColor);
-      break;
+  // Below values used to validate inputs for drawing a specific shape.
+  // Drawing single pixel and a line is disabled by default any only enabled if
+  // A circle or rectangle can't be drawn.
+  // Drawing a pixel is only activated if no other supported shape can be drawn.
+  bool isDrawPixel, isDrawLine;
+  bool isDrawCircle = true;
+  bool isDrawRect = true;
 
-    case Shape::Line:
-      drawLine(xAxis, yAxis, length, breadth, fillColor);
-      break;
+  // 1. ********* Rectangle Drawing Inputs Validation *************
 
-    case Shape::Circle:
-      drawCircle(xAxis, yAxis, radius, fillColor, strokeWidth, strokeColor);
-      break;
-
-    case Shape::Rectangle:
-      drawRect(xAxis, yAxis, length, breadth, radius, strokeWidth, strokeColor,
-               fillColor);
-      break;
-
-    default:
-      // Unsupported shape was found.
-      return;
+  if (length > _width || breadth > _height) {
+    isDrawRect = false;    // full rectangle is out-of-bounds.
+    isDrawCircle = false;  // Rounded-edges rectangle cannot be drawn.
   }
-}
 
-void TFT_GFX::drawPixel(uint16_t xAxis, uint16_t yAxis, uint16_t breadth,
-                        uint16_t fillColor) {}
-void TFT_GFX::drawLine(uint16_t xAxis, uint16_t yAxis, uint16_t length,
-                       uint16_t breadth, uint16_t fillColor) {}
-void TFT_GFX::drawRect(uint16_t xAxis, uint16_t yAxis, uint16_t length,
-                       uint16_t breadth, uint16_t radius, uint8_t strokeWidth,
-                       uint16_t strokeColor, uint16_t fillColor) {}
+  if (length == 0 || breadth == 0) {
+    isDrawRect = false;    // Either of the length or breadth cannot be empty.
+    isDrawCircle = false;  // Rounded-edges rectangle cannot be drawn.
+  }
 
-/**
- * @brief Draws a circle by setting the shape fill and outline (if provided)
- *          pixels in the displayData array.
- * @param xAxis x coordinate for the top-left corner where the Circle drawing
- *             will begin from. (Required)
- * @param yAxis y coordinate for the top-left corner where the Circle drawing
- *             will begin from. (Required)
- * @param radius distance from a central point where the circumference outline
- *              will be plotted at. (Required)
- * @param strokeWidth size of the Circle ouline. Default is zero. (Optional)
- * @param strokeColor color pixel used to display the circle outline (stroke)
- *                    on the display. Its is updated on displayData array.
- * @param fillColor color pixel used to display the actual circle fill.
- * @note The center of the circle is adjusted so that the square area within
- *        which the circle will fit can be computed from the top-left
- *        corner referred to by the coordinates (xAxis, yAxis).
- */
-void TFT_GFX::drawCircle(uint16_t xAxis, uint16_t yAxis, uint16_t radius,
-                         uint8_t strokeWidth, uint16_t strokeColor,
-                         uint16_t fillColor) {
-  volatile uint16_t x0 = (2*radius) + (2*strokeWidth) + xAxis;
-  if (x0 > _width) return; // circle exceeds the display bounds
+  // 2. ********* Circle Drawing Inputs Validation *************
 
-   volatile uint16_t y0 = (2*radius) + (2*strokeWidth) + yAxis;
-  if (y0 > _height) return; // circle exceeds the display bounds
+  volatile uint16_t diameter = 2 * radius;
+  volatile uint16_t x0 = diameter + (2 * strokeWidth) + xAxis;
+  volatile uint16_t y0 = diameter + (2 * strokeWidth) + yAxis;
 
-  x0 = xAxis + radius; // Set the correct x axis center point.
-  y0 = yAxis + radius; // Set the correct y axis center point.
+  if (x0 > _width) isDrawCircle = false;   // full circle is out-of-bounds.
+  if (y0 > _height) isDrawCircle = false;  // full circle is out-of-bounds.
 
-  // Draw quadrant 1
-  TFT_GFX::drawQuadrant(q1, x0, y0, radius, strokeWidth, strokeColor,
-                        fillColor);
-  // Draw quadrant 2
-  TFT_GFX::drawQuadrant(q2, x0, y0, radius, strokeWidth, strokeColor,
-                        fillColor);
-  // Draw quadrant 3
-  TFT_GFX::drawQuadrant(q3, x0, y0, radius, strokeWidth, strokeColor,
-                        fillColor);
-  // Draw quadrant 4
-  TFT_GFX::drawQuadrant(q4, x0, y0, radius, strokeWidth, strokeColor,
-                        fillColor);
-}
+  if (radius == 0) isDrawCircle = false;  // radius cannot be empty.
 
-/**
- * @brief Plots the quadrant's fill and outline pixels in the displayData array.
- * @param q quadrant type either:; q1, q2, q3 or q4.
- * @param x0 x coordinate for the center of the circle.
- * @param y0 y coordinate for the center of the circle.
- * @param radius is actual radius length of the circle.
- * @param strokeWidth size of the Circle ouline.
- * @param strokeColor color pixel used to display the circle outline.
- * @param fillColor color pixel used to display the actual circle fill.
- * @note While computing the pixels using the circle algorithm, center (0,0) is
- * used but is then adjusted with provided parameters (xAxis, yAxis) before
- * updating displayData array.
- */
-void TFT_GFX::drawQuadrant(TFT_GFX::quadrant q, uint16_t x0, uint16_t y0,
-                           uint16_t radius, uint8_t strokeWidth,
-                           uint16_t strokeColor, uint16_t fillColor) {
-  volatile uint16_t startFillPos, startStrokePos, xPixels, xFillPixels,
-      xStrokePixels;
-  volatile float strokeToFillPxs;
+  // Radius too large compared to breadth or length of the rounded-rectangle
+  if (diameter > length || diameter > breadth) isDrawCircle = false;
 
-  if (strokeWidth > 0) strokeToFillPxs = (float)strokeWidth / (float)radius;
+  if (radius > xAxis || radius > yAxis) {
+    isDrawCircle = false;  // a circle sector (part of it) is out-of-bounds.
+  }
 
-  for (int i = 0; i < radius; i++) {
-    xPixels = circleAlgo(i, radius + strokeWidth);
+  // 3. ********* Line Drawing Inputs Validation *************
 
-    // Compute the strokePixels
-    if (strokeWidth > 0) xStrokePixels = (uint16_t)(strokeToFillPxs * xPixels);
+  // Only attempt to draw a line if a circle or reectangle can't.
+  isDrawLine = isDrawCircle && isDrawRect && false;
 
-    // Compute the fill pixels.
-    xFillPixels = xPixels - xStrokePixels;
+  // No length or breadth found.
+  if (length == 0 && breadth == 0) isDrawLine = false;
 
-    switch (q) {
-      case q1:
-        startFillPos = x0 - (i * _width);
-        if (strokeWidth > 0) startStrokePos = startFillPos + xFillPixels;
-        break;
+  x0 = length + xAxis;
+  if (x0 > _width) isDrawLine = false;  // length out-of-bounds.
 
-      case q2:
-        startFillPos = x0 + (i * _width);
-        if (strokeWidth > 0) startStrokePos = startFillPos + xFillPixels;
-        break;
+  y0 = breadth + yAxis;
+  if (y0 > _height) isDrawLine = false;  // breadth out-of-bounds.
 
-      case q3:
-        startFillPos = x0 - (i * _width) - xFillPixels;
-        if (strokeWidth > 0) startStrokePos = startFillPos - xStrokePixels;
-        break;
+  // 4. ********* Pixel Drawing Inputs Validation *************
 
-      default:  // q4
-        startFillPos = x0 + (i * _width) - xFillPixels;
-        if (strokeWidth > 0) startStrokePos = startFillPos - xStrokePixels;
-        break;
+  isDrawPixel = isDrawLine && false;  // Draw a pixel if a line can't.
+
+  // Pixel out of bounds
+  if (xAxis > _width || yAxis > _height) isDrawPixel = false;
+
+  volatile uint16_t xFill, xStroke;
+
+  // Draw a circle if the required valid parameters were found.
+  if (isDrawCircle) {
+    int y = 0;
+    while (y <= xFill) {  // True only till the first octet is plotted.
+      y++;
+
+      // Compute and plot the x strokePixels value if supported.
+      if (strokeWidth > 0) {
+        xStroke = circleAlgo(y, radius + strokeWidth);
+        plotOctets(xAxis, yAxis, xStroke, y, length-diameter, breadth-diameter, strokeColor);
+      }
+
+      // Compute and plot the x fillPixels value.
+      xFill = circleAlgo(y, radius);
+      plotOctets(xAxis, yAxis, xFill, y, length-diameter, breadth-diameter, fillColor);
     }
-    // Set the circle fill
-    memset(&displayData[startFillPos], fillColor, xFillPixels);
-    if (strokeWidth > 0)
-      memset(&displayData[startStrokePos], strokeColor, xStrokePixels);
   }
+
+  volatile uint16_t startFillPos, xFillCounts;
+  if (isDrawRect) {
+    xFill = length;         // Pixels per x axis row to fill at ago.
+    xFillCounts = breadth - diameter;  // Turns to fill pixels per x axis row.
+  }
+
+  if (isDrawLine) {
+    if (breadth == 0) {  //< Drawing a horizontal line.
+      xFill = length;
+      xFillCounts = 1;
+    } else {  //< Drawing a vertical line.
+      xFill = 1;
+      xFillCounts = breadth;
+    }
+    radius = 0; // Disable the radius if it was preset.
+  }
+
+  if (isDrawPixel) {
+    xFill = 1;        // Pixels per x axis row to fill at ago.
+    xFillCounts = 1;  // Turns to fill pixels per x axis row.
+    radius = 0; // Disable the radius if it was preset.
+  }
+
+  while (xFillCounts > 0) {
+     startFillPos = _width * (xAxis - xFill - radius) + xFill + 1;
+    memset(&displayData[startFillPos], fillColor, xFill);
+    xFillCounts--;
+  }
+}
+
+/**
+ * @brief Plots the all circle's symmetrical octets's fill and outline pixels in
+ * the displayData array using coordinates for the single octets calculated
+ * (xFill, yFill).
+ * @param xAxis x value for moving the shape into the required position.
+ * @param yAxis y value for moving the shape into the required position
+ * @param xFill x coordinates for the circle outline.
+ * @param yFill y coordinates for the circle outline.
+ * @param length length of the rounded-rectangle (= Original L - 2 * Radius).
+ * @param breadth width of the rounded-rectangle. (= Original W - 2 * Radius).
+ * @param color color pixel used to display the circle fill or outline.
+ *
+ * @note The Sketch below shows how the various octets are number.
+ * @note ****`3 <----> 2`****
+ * @note *`4 <---------> 1`*
+ * @note *`5 <---------> 8`*
+ * @note ****`6 <----> 7`***
+ */
+void TFT_GFX::plotOctets(uint16_t xAxis, uint16_t yAxis, uint16_t xFill,
+                         uint16_t yFill, uint16_t length, uint16_t breadth,
+                         uint16_t color) {
+  volatile uint16_t startFillPos, xFillPixels;
+
+  // Plot Octet 3 <----> 2
+  xFillPixels = 2 * yFill + length;
+  startFillPos = _width * (xAxis - xFill) + xFill + 1;
+  memset(&displayData[startFillPos], color, xFillPixels);
+
+  // Plot Octet 4 <----> 1
+  xFillPixels = 2 * xFill + length;
+  startFillPos = _width * (yAxis - yFill) + yFill + 1;
+  memset(&displayData[startFillPos], color, xFillPixels);
+
+  // Plot Octet 5 <----> 8
+  xFillPixels = 2 * xFill + length;
+  startFillPos = _width * (yAxis + yFill + breadth) + yFill + 1;
+  memset(&displayData[startFillPos], color, xFillPixels);
+
+  // Plot Octet 6 <----> 7
+  xFillPixels = 2 * yFill + length;
+  startFillPos = _width * (xAxis + xFill + breadth) + xFill + 1;
+  memset(&displayData[startFillPos], color, xFillPixels);
 }
 
 /**

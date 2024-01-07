@@ -42,26 +42,30 @@ class TFT_GFX {
  private:
   uint16_t displayData[PIXELS];
 
-  /**
-   * @brief Defines one-forth of an equally divided circle from its center.
-   *        The quadrants are labelled clockwise starting with the top-right
-   *        quadrant as q1.
-   */
-  enum quadrant { q1, q2, q3, q4 };
+//   /**
+//    * @brief Defines the varous segments of circle supported. Quadrants q1 to q4
+//    * defines one-forth of an equally divided circle from its center and are
+//    * labelled clockwise starting with the top-right quadrant. circle defines the
+//    * full Circle.
+//    */
+//   enum sectors { q1, q2, q3, q4, circle };
 
-  virtual void writeImage(uint8_t *img, uint16_t num);
+//   virtual void writeImage(uint8_t *img, uint16_t num);
 
-  void drawPixel(uint16_t xAxis, uint16_t yAxis, uint16_t breadth,
-                 uint16_t fillColor);
-  void drawLine(uint16_t xAxis, uint16_t yAxis, uint16_t length,
-                uint16_t breadth, uint16_t fillColor);
-  void drawCircle(uint16_t xAxis, uint16_t yAxis, uint16_t radius,
-                  uint8_t strokeWidth, uint16_t strokeColor,
-                  uint16_t fillColor);
-  void drawRect(uint16_t xAxis, uint16_t yAxis, uint16_t length,
-                uint16_t breadth, uint16_t radius, uint8_t strokeWidth,
-                uint16_t strokeColor, uint16_t fillColor);
-  void drawQuadrant(quadrant q, uint16_t x0, uint16_t y0, uint16_t radius,
-                    uint8_t strokeWidth, uint16_t strokeColor,
-                    uint16_t fillColor);
+//   void drawPixel(uint16_t xAxis, uint16_t yAxis, uint16_t breadth,
+//                  uint16_t fillColor);
+//   void drawLine(uint16_t xAxis, uint16_t yAxis, uint16_t length,
+//                 uint16_t breadth, uint16_t fillColor);
+//   void drawCircle(uint16_t xAxis, uint16_t yAxis, uint16_t radius,
+//                   uint8_t strokeWidth, uint16_t strokeColor,
+//                   uint16_t fillColor);
+//   void drawRect(uint16_t xAxis, uint16_t yAxis, uint16_t length,
+//                 uint16_t breadth, uint16_t radius, uint8_t strokeWidth,
+//                 uint16_t strokeColor, uint16_t fillColor);
+  void plotOctets(uint16_t xAxis, uint16_t yAxis, uint16_t xFill,
+                  uint16_t yFill, uint16_t length, uint16_t breadth,
+                  uint16_t color);
+//   void drawSectors(sectors sc, uint16_t x0, uint16_t y0, uint16_t radius,
+//                    uint8_t strokeWidth, uint16_t strokeColor,
+//                    uint16_t fillColor);
 };
