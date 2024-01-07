@@ -44,7 +44,7 @@
              pins.
 */
 TFT_SPI::TFT_SPI(uint16_t w, uint16_t h, int8_t cs, int8_t dc, int8_t rst)
-    : Adafruit_GFX(w, h) {
+    : TFT_GFX(w, h) {
   _rst = rst;
   _cs = cs;
   _dc = dc;
@@ -204,88 +204,6 @@ void TFT_SPI::writeImage(uint8_t *img, uint16_t num) {
   }
 }
 
-// -------------------------------------------------------------------------
-// Lower-level graphics operations. These functions require a chip-select
-// and/or SPI transaction around them.
-// Higher-level graphics primitives might start a single transaction and
-// then make multiple calls to these functions (e.g. circle or text
-// rendering might make repeated lines or rects) before ending the
-// transaction. It's more efficient than starting a transaction every time.
-
-// /*!
-//     @brief  Draw a single pixel to the display at requested coordinates.
-//             Not self-contained; should follow a startWrite() call.
-//     @param  x      Horizontal position (0 = left).
-//     @param  y      Vertical position   (0 = top).
-//     @param  color  16-bit pixel color in '565' RGB format.
-// */
-// void TFT_SPI::drawPixel(int16_t x, int16_t y, uint16_t color) {
-//   if (x < 0 || x >= _width || y < 0 || y >= _height) return;
-//   setAddressWindow(x, y, x + 1, y + 1);
-
-//   writeSPI(color >> 8);
-//   writeSPI(color);
-
-//   SPI_END();
-// }
-
-// /*!
-//     @brief  Draw a horizontal line on the display. Performs edge clipping
-//             and rejection.
-//     @param  x      Horizontal position of first point.
-//     @param  y      Vertical position of first point.
-//     @param  wh      Line width/length in pixels (positive = right of first
-//    point, negative = point of first corner).
-//     @param  color  16-bit line color in '565' RGB format.
-// */
-// void TFT_SPI::drawLine(int16_t x, int16_t y, int16_t wh, lineType line,
-//                               uint16_t color) {
-//   if (x < 0 || x >= _width || y < 0 || y >= _height) return;
-
-//   switch (line) {
-//     case Horizontal:  // Horizontal Line
-//       setAddressWindow(x, y, x + wh - 1, y);
-//       break;
-
-//     default:          // Vertical Line
-//       setAddressWindow(x, y, x, y + wh - 1);
-//       break;
-//   }
-
-//   writeData16(color, wh*2);
-
-//   SPI_END();
-// }
-
-// /*!
-//     @brief  Draw a filled rectangle to the display. Not self-contained;
-//             should follow startWrite().
-//     @param  x      Horizontal position of first corner.
-//     @param  y      Vertical position of first corner.
-//     @param  w      Rectangle width in pixels (positive = right of first
-//                    corner, negative = left of first corner).
-//     @param  h      Rectangle height in pixels (positive = below first
-//                    corner, negative = above first corner).
-//     @param  color  16-bit fill color in '565' RGB format.
-//     @note   Written in this deep-nested way because C by definition will
-//             optimize for the 'if' case, not the 'else' -- avoids branches
-//             and rejects clipped rectangles at the least-work possibility.
-// */
-// void TFT_SPI::fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
-//                        uint16_t color) {
-//   if (x < 0 || x >= _width || y < 0 || y >= _height) return;
-//   setAddressWindow(x, y, x + w - 1, y + h - 1);
-
-//   uint32_t num = (uint32_t)w * h;
-//   if (num > 0xffff) {
-//     writeData16(color, 0xffff);
-//     writeData16(color, num - 0xffff);
-//   } else
-//     writeData16(color, num);
-
-//   SPI_END();
-// }
-
 /*!
     @brief  Draw a 16-bit color pixels (565 RGB) start from the at the
             specified (x,y) position till the end of the array
@@ -309,20 +227,6 @@ void TFT_SPI::drawScreen(uint16_t xAxis, int16_t yAxis, uint16_t width,
 
 // -------------------------------------------------------------------------
 // Miscellaneous class member functions that don't draw anything.
-
-// /*!
-//     @brief   Given 8-bit red, green and blue values, return a 'packed'
-//              16-bit color value in '565' RGB format (5 bits red, 6 bits
-//              green, 5 bits blue). This is just a mathematical operation,
-//              no hardware is touched.
-//     @param   red    8-bit red brightnesss (0 = off, 255 = max).
-//     @param   green  8-bit green brightnesss (0 = off, 255 = max).
-//     @param   blue   8-bit blue brightnesss (0 = off, 255 = max).
-//     @return  'Packed' 16-bit color value (565 format).
-// */
-// uint16_t TFT_SPI::color565(uint8_t red, uint8_t green, uint8_t blue) {
-//   return ((red & 0xF8) << 8) | ((green & 0xFC) << 3) | (blue >> 3);
-// }
 
 /*!
       @brief  Handles the complete sending of 8-bit commands and data chunks.

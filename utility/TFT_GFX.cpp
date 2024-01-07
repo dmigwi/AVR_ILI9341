@@ -21,14 +21,24 @@
 
 #include "TFT_GFX.h"
 
-#include <graphics.h>
-
 TFT_GFX::TFT_GFX(uint16_t w, uint16_t h) {
     _width = w;
     _height = h;
+    _pixels = w*h;
+
+    // Sets the screen to display color black(0x00) before loading anything else.
+    displayData[_pixels] = {};
 }
 
 TFT_GFX::~TFT_GFX() {}
+
+/**
+ * @brief Fills the whole screen with the color provided.
+ * @param color color pixels to display for the whole viewable area.
+*/
+void TFT_GFX::fillScreen(uint16_t color) {
+    memset(&displayData, color, _pixels);
+}
 
 /**
  * @brief Draws the supported shapes by setting the respective the colors in the
@@ -56,7 +66,7 @@ TFT_GFX::~TFT_GFX() {}
  *        `strokewidth` greater than zero was provided. Top-left corner is
  *        assumed to be the corner with coordinates (0,0) on the screen display.
  */
-void TFT_GFX::drawShape(Shape sType, uint16_t xAxis, uint16_t yAxis,
+void TFT_GFX::drawShape(uint16_t xAxis, uint16_t yAxis,
                         uint16_t length, uint16_t breadth, uint16_t radius,
                         uint8_t strokeWidth, uint16_t strokeColor,
                         uint16_t fillColor) {
@@ -181,7 +191,7 @@ void TFT_GFX::drawShape(Shape sType, uint16_t xAxis, uint16_t yAxis,
  * @param breadth width of the rounded-rectangle. (= Original W - 2 * Radius).
  * @param color color pixel used to display the circle fill or outline.
  *
- * @note The Sketch below shows how the various octets are number.
+ * @note The Sketch below shows how the various octets are numbered.
  * @note ****`3 <----> 2`****
  * @note *`4 <---------> 1`*
  * @note *`5 <---------> 8`*

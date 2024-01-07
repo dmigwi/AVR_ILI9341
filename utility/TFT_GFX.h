@@ -22,50 +22,26 @@
 #include "Arduino.h"
 #include "TFT_SPI.h"
 
-#define PIXELS 76800  // = 240 x 230
-
-enum Shape { Pixel, Line, Circle, Rectangle };
-
 class TFT_GFX {
  public:
   TFT_GFX(uint16_t w, uint16_t h);  // Constructor
 
   ~TFT_GFX();  // Destructor
 
-  void drawShape(Shape sType, uint16_t xAxis, uint16_t yAxis, uint16_t length,
+  void fillScreen(uint16_t color);
+
+  void drawShape(uint16_t xAxis, uint16_t yAxis, uint16_t length,
                  uint16_t breadth, uint16_t radius, uint8_t strokeWidth,
                  uint16_t strokeColor, uint16_t fillColor);
 
  protected:
   uint16_t _width, _height;
+  uint16_t _pixels;
 
  private:
-  uint16_t displayData[PIXELS];
+  uint16_t displayData[];
 
-//   /**
-//    * @brief Defines the varous segments of circle supported. Quadrants q1 to q4
-//    * defines one-forth of an equally divided circle from its center and are
-//    * labelled clockwise starting with the top-right quadrant. circle defines the
-//    * full Circle.
-//    */
-//   enum sectors { q1, q2, q3, q4, circle };
-
-//   virtual void writeImage(uint8_t *img, uint16_t num);
-
-//   void drawPixel(uint16_t xAxis, uint16_t yAxis, uint16_t breadth,
-//                  uint16_t fillColor);
-//   void drawLine(uint16_t xAxis, uint16_t yAxis, uint16_t length,
-//                 uint16_t breadth, uint16_t fillColor);
-//   void drawCircle(uint16_t xAxis, uint16_t yAxis, uint16_t radius,
-//                   uint8_t strokeWidth, uint16_t strokeColor,
-//                   uint16_t fillColor);
-//   void drawRect(uint16_t xAxis, uint16_t yAxis, uint16_t length,
-//                 uint16_t breadth, uint16_t radius, uint8_t strokeWidth,
-//                 uint16_t strokeColor, uint16_t fillColor);
   void plotOctets(uint16_t xAxis, uint16_t yAxis, uint16_t xFill,
                   uint16_t yFill, uint16_t length, uint16_t breadth,
                   uint16_t color);
-//   void drawSectors(sectors sc, uint16_t x0, uint16_t y0, uint16_t radius,
-//                    uint8_t strokeWidth, uint16_t strokeColor,
-//                    uint16_t fillColor);
 };

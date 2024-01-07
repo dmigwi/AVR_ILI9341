@@ -31,7 +31,7 @@
 #include <Print.h>
 #include <SPI.h>
 
-#include "Adafruit_GFX.h"
+#include "TFT_GFX.h"
 
 // HARDWARE CONFIG
 // -----------------------------------------------------------------------------
@@ -51,7 +51,7 @@
           It handles certain operations that are common to a range of
           displays (address window, area fills, etc.).
 */
-class TFT_SPI : public Adafruit_GFX {
+class TFT_SPI : public TFT_GFX {
  public:
   // CONSTRUCTORS
   // ---------------------------------------------------------------------------
@@ -75,26 +75,11 @@ class TFT_SPI : public Adafruit_GFX {
 
   virtual ~TFT_SPI(){};
 
-  // /*!
-  //       @brief Defines the various types of straight line primitives supported.
-  // */
-  // enum lineType { Horizontal, Vertical };
-
   // PUBLIC CLASS MEMBER FUNCTIONS
   // ---------------------------------------------------------------------------
 
   void drawScreen(uint16_t xAxis, int16_t yAxis, uint16_t width,
-                        uint16_t height, uint16_t *pcolors);
-                        
-  // --drawPixel and drawline primitive function might be replaced with better
-  // more efficient graphics display management primitives.--
-  // void drawPixel(int16_t x, int16_t y, uint16_t color);
-  // void drawLine(int16_t x, int16_t y, int16_t w, lineType line, uint16_t color);
-
-  // void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
-
-
-  // uint16_t color565(uint8_t red, uint8_t green, uint8_t blue);
+                  uint16_t height, uint16_t *pcolors);
 
  private:
   // PRIVATE CLASS MEMBER FUNCTIONS
