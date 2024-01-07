@@ -24,7 +24,7 @@
 
 class TFT_GFX {
  public:
-  TFT_GFX(uint16_t w, uint16_t h);  // Constructor
+  TFT_GFX(uint16_t w, uint16_t h, uint16_t pixels);  // Constructor
 
   ~TFT_GFX();  // Destructor
 
@@ -35,13 +35,12 @@ class TFT_GFX {
                  uint16_t strokeColor, uint16_t fillColor);
 
  protected:
-  uint16_t _width, _height;
-  uint16_t _pixels;
+  uint16_t _width, _height, _pixels;
+  uint8_t rotation;
 
  private:
-  uint16_t displayData[];
-
   void plotOctets(uint16_t xAxis, uint16_t yAxis, uint16_t xFill,
                   uint16_t yFill, uint16_t length, uint16_t breadth,
                   uint16_t color);
+ virtual void setScreenData(uint16_t startPos, uint16_t color, uint16_t len);
 };

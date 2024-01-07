@@ -31,13 +31,10 @@
 
 #include "Print.h"
 #include <SPI.h>
-#include <Adafruit_I2CDevice.h>
-#include <Adafruit_SPIDevice.h>
-#include "utility/Adafruit_GFX.h"
+// #include <Adafruit_I2CDevice.h>
+// #include <Adafruit_SPIDevice.h>
+#include "utility/TFT_GFX.h"
 #include "utility/TFT_SPI.h"
-
-#define ILI9341_TFTWIDTH 240  ///< ILI9341 max TFT width
-#define ILI9341_TFTHEIGHT 320 ///< ILI9341 max TFT height
 
 #define ILI9341_NOP 0x00     ///< No-op register
 #define ILI9341_SWRESET 0x01 ///< Software reset register

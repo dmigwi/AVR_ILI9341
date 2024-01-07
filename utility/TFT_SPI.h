@@ -42,14 +42,18 @@
 #define DEFAULT_SPI_FREQ 16000000L  ///< Hardware SPI default speed
 #endif
 
+#define TFT_WIDTH 240     ///< Maximum TFT display hardware width.
+#define TFT_HEIGHT 320    ///< Maximum TFT display hardware height.
+#define TFT_PIXELS 76800  ///< Maximum TFT display pixels. (=240 x 320)
+
 // CLASS DEFINITION
 // -----------------------------------------------------------------------------
 
 /*!
-  @brief  TFT_SPI is an intermediary class between Adafruit_GFX
-          and various hardware-specific subclasses for different displays.
-          It handles certain operations that are common to a range of
-          displays (address window, area fills, etc.).
+  @brief  TFT_SPI is an intermediary class between TFT_GFX and various
+  hardware-specific subclasses for different displays. It handles certain
+  operations that are common to a range of displays (address window, area fills,
+  etc.).
 */
 class TFT_SPI : public TFT_GFX {
  public:
@@ -60,15 +64,11 @@ class TFT_SPI : public TFT_GFX {
         @brief Hardware SPI constructor uses the default SPI pin. The default
                 MOSI, MISO and SPI pins are used according to the AVR board's
                 specification in it variant "pins_arduino.h" file.
-        @param width defines the width of the display according to its
-                hardware specifications.
-        @param height defines the height of the display according to its
-                hardware specifications.
         @param cs defines the chipset pin.
         @param dc defines the Data/Command select pin.
         @param rst defines the reset pin of the display.
   */
-  TFT_SPI(uint16_t width, uint16_t height, int8_t cs, int8_t dc, int8_t rst);
+  TFT_SPI(int8_t cs, int8_t dc, int8_t rst);
 
   // DESTRUCTOR
   // ---------------------------------------------------------------------------
@@ -80,7 +80,6 @@ class TFT_SPI : public TFT_GFX {
 
   void drawScreen(uint16_t xAxis, int16_t yAxis, uint16_t width,
                   uint16_t height, uint16_t *pcolors);
-
  private:
   // PRIVATE CLASS MEMBER FUNCTIONS
   // ---------------------------------------------------------------------------
@@ -119,6 +118,8 @@ class TFT_SPI : public TFT_GFX {
   void sendCommand(uint8_t cmd, const uint8_t *dataBytes, uint8_t numBytes);
   uint8_t readcommand8(uint8_t commandByte, uint8_t index);
 
+  void setScreenData(uint16_t startPos, uint16_t color, uint16_t len);
+
   void SPI_START();
   void SPI_END();
 
@@ -140,10 +141,14 @@ class TFT_SPI : public TFT_GFX {
   };  ///< Only one interface is active
 #endif
 
-  uint8_t connection;  ///< TFT_HARD_SPI, TFT_SOFT_SPI, etc.
-  int8_t _rst;         ///< Reset pin # (or -1)
-  int8_t _cs;          ///< Chip select pin # (or -1)
-  int8_t _dc;          ///< Data/command pin #
+  int8_t _rst;  ///< Reset pin # (or -1)
+  int8_t _cs;   ///< Chip select pin # (or -1)
+  int8_t _dc;   ///< Data/command pin #
+
+  static uint16_t WIDTH;
+  static uint16_t HEIGHT;
+
+  uint16_t screenData[TFT_PIXELS];
 };
 
 #endif  // end _TFT_SPI_H_

@@ -42,14 +42,19 @@
              typically will need to call subclass' begin() function, which
              in turn calls this library's initSPI() function to initialize
              pins.
+    @note TFT_WIDTH defines the width of the display according to its
+              hardware specifications.
+    @note TFT_HEIGHT defines the height of the display according to its
+                hardware specifications.
 */
-TFT_SPI::TFT_SPI(uint16_t w, uint16_t h, int8_t cs, int8_t dc, int8_t rst)
-    : TFT_GFX(w, h) {
+TFT_SPI::TFT_SPI(int8_t cs, int8_t dc, int8_t rst)
+    : TFT_GFX(TFT_WIDTH, TFT_HEIGHT, TFT_PIXELS) {
   _rst = rst;
   _cs = cs;
   _dc = dc;
-  _width = w;
-  _height = h;
+  WIDTH = TFT_WIDTH;    // Constant throughout the program lifetime
+  HEIGHT = TFT_HEIGHT;  // Constant throughout the program lifetime
+
   hwspi._spi = &SPI;  // Pointer to SPIClass type.
 }
 
@@ -215,7 +220,7 @@ void TFT_SPI::writeImage(uint8_t *img, uint16_t num) {
     @param  height   Height of bitmap in pixels.
 */
 void TFT_SPI::drawScreen(uint16_t xAxis, int16_t yAxis, uint16_t width,
-                        uint16_t height, uint16_t *pcolors) {
+                         uint16_t height, uint16_t *pcolors) {
   if (xAxis >= _width || yAxis >= _height || width > _width || height > _height)
     return;
   setAddressWindow(xAxis, yAxis, (xAxis + width - 1), (yAxis + height - 1));
@@ -223,6 +228,17 @@ void TFT_SPI::drawScreen(uint16_t xAxis, int16_t yAxis, uint16_t width,
   writeImage((uint8_t *)pcolors, width * height);
 
   SPI_END();
+}
+
+/***
+ * @brief Makes updates on the screen display data array.
+ * @param startPos An array index from which pixels to be displayed are held
+ * till the need to display the data arises.
+ * @param color the color pixel to update from the specified array locations.
+ * @param len count of pixels to be affected by the current color changes.
+ */
+void TFT_SPI::setScreenData(uint16_t startPos, uint16_t color, uint16_t len) {
+  memset(&screenData[startPos], color, len);
 }
 
 // -------------------------------------------------------------------------

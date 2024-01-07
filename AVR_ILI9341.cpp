@@ -37,7 +37,7 @@
     @param  rst  Reset pin ## (required).
 */
 AVR_ILI9341::AVR_ILI9341(int8_t cs, int8_t dc, int8_t rst)
-    : TFT_SPI(ILI9341_TFTWIDTH, ILI9341_TFTHEIGHT, cs, dc, rst) {}
+    : TFT_SPI(cs, dc, rst) {}
 
 // clang-format off
 // TFT LCD(ILI9341V) startup configuration is available here: 
@@ -106,23 +106,23 @@ void AVR_ILI9341::setRotation(uint8_t m) {
   switch (rotation) {
     case 0:
       m = (MADCTL_MX | MADCTL_BGR);
-      _width = ILI9341_TFTWIDTH;
-      _height = ILI9341_TFTHEIGHT;
+      _width = TFT_WIDTH;
+      _height = TFT_HEIGHT;
       break;
     case 1:
       m = (MADCTL_MV | MADCTL_BGR);
-      _width = ILI9341_TFTHEIGHT;
-      _height = ILI9341_TFTWIDTH;
+      _width = TFT_HEIGHT;
+      _height = TFT_WIDTH;
       break;
     case 2:
       m = (MADCTL_MY | MADCTL_BGR);
-      _width = ILI9341_TFTWIDTH;
-      _height = ILI9341_TFTHEIGHT;
+      _width = TFT_WIDTH;
+      _height = TFT_HEIGHT;
       break;
     case 3:
       m = (MADCTL_MX | MADCTL_MY | MADCTL_MV | MADCTL_BGR);
-      _width = ILI9341_TFTHEIGHT;
-      _height = ILI9341_TFTWIDTH;
+      _width = TFT_HEIGHT;
+      _height = TFT_WIDTH;
       break;
   }
 
@@ -152,8 +152,8 @@ void AVR_ILI9341::scrollTo(uint16_t y) {
  */
 void AVR_ILI9341::setScrollMargins(uint16_t top, uint16_t bottom) {
   // TFA+VSA+BFA must equal 320
-  if (top + bottom <= ILI9341_TFTHEIGHT) {
-    uint16_t middle = ILI9341_TFTHEIGHT - (top + bottom);
+  if (top + bottom <= TFT_HEIGHT) {
+    uint16_t middle = TFT_HEIGHT - (top + bottom);
     uint8_t data[6];
     data[0] = top >> 8;
     data[1] = top & 0xff;
