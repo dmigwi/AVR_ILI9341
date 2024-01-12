@@ -29,8 +29,6 @@
  */
 enum segment { Top, Bottom };
 
-// enum line { Horizontal, Vertical };
-
 class TFT_GFX {
  public:
   TFT_GFX(uint16_t w, uint16_t h, uint32_t pixels);  // Constructor
@@ -55,9 +53,9 @@ class TFT_GFX {
  private:
   uint16_t circleAlgo(uint16_t y, uint16_t radius);
   void plotOctets(segment hemisphere, uint16_t xCenter, uint16_t yCenter,
-                         uint16_t xOutline, uint16_t yOutline, uint16_t length,
-                         uint16_t color);
+                  uint16_t xOutline, uint16_t yOutline, uint16_t length,
+                  uint16_t color);
   void setScreenData(uint16_t xPos, uint16_t yPos, uint16_t _xFillPx,
-                            uint8_t _depth, uint16_t _fillcolor);
+                     uint8_t _depth, uint16_t _fillcolor);
 };
 #endif  // end _TFT_GFX_H_

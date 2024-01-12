@@ -210,48 +210,6 @@ void TFT_SPI::writeImage(uint16_t *img, uint32_t num) {
   }
 }
 
-// /**
-//  * @brief  Draws 16-bit display color pixels (565 RGB) in the screenData
-//  array *from the start position specified (xAxis,yAxis) position till the
-//  length *specified.
-//  * @param  xAxis    x axis value used to move the shape into the position.
-//  * @param  yAxis    y axis value used to move the shape into the position.
-//  * @param  width    Width of display that will have its pixels updated.
-//  * @param  height   Height of display that will have its pixels updated.
-//  * @param  startFillPos  screenData index array from where pixels will be
-//  *editted.
-//  * @note All parameters take up default values of zero. If width and height
-//  *parameters have zero values, they are assigned the max display
-//  *width and height measurements indicating that the whole screen should be
-//  *redrawn.
-//  */
-// void TFT_SPI::drawScreen(uint16_t xAxis, uint16_t yAxis, uint16_t width,
-//                          uint16_t height, uint16_t startFillPos) {
-//   if (width == 0) width = _width;     // Max display width is assigned.
-//   if (height == 0) height = _height;  // Max display height is assigned.
-
-//   if (xAxis >= _width || yAxis >= _height || width > _width || height >
-//   _height)
-//     return;
-//   setAddressWindow(xAxis, yAxis, (xAxis + width - 1), (yAxis + height - 1));
-
-//   writeImage(&screenData[startFillPos], width * height);
-
-//   SPI_END();
-// }
-
-// /***
-//  * @brief Makes updates on the screen display data array.
-//  * @param startPos An array index from which pixels to be displayed are held
-//  * till the need to display the data arises.
-//  * @param color the color pixel to update from the specified array locations.
-//  * @param num count of pixels to be affected by the current color changes.
-//  */
-// void TFT_SPI::setScreenData(uint16_t startPos, uint16_t color, uint16_t num)
-// {
-//   memset(&screenData[startPos], color, num);
-// }
-
 // -------------------------------------------------------------------------
 // Miscellaneous class member functions that don't draw anything.
 

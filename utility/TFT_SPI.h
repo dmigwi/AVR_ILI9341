@@ -78,9 +78,6 @@ class TFT_SPI : public TFT_GFX {
   // PUBLIC CLASS MEMBER FUNCTIONS
   // ---------------------------------------------------------------------------
 
-  // void drawScreen(uint16_t xAxis, uint16_t yAxis, uint16_t width,
-  //                 uint16_t height, uint16_t startFillPos);
-
  private:
   // PRIVATE CLASS MEMBER FUNCTIONS
   // ---------------------------------------------------------------------------
@@ -113,8 +110,6 @@ class TFT_SPI : public TFT_GFX {
   void sendCommand(uint8_t cmd, const uint8_t *dataBytes, uint8_t numBytes);
   uint8_t readcommand8(uint8_t commandByte, uint8_t index);
 
-  // void setScreenData(uint16_t startPos, uint16_t color, uint16_t num);
-
   void SPI_START();
   void SPI_END();
 
@@ -142,8 +137,6 @@ class TFT_SPI : public TFT_GFX {
 
   uint16_t WIDTH;
   uint16_t HEIGHT;
-
-  // uint16_t screenData[TFT_PIXELS];
 };
 
 #endif  // end _TFT_SPI_H_
