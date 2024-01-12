@@ -1,24 +1,18 @@
 /*!
- * @file TFT_SPI.h (Originally Adafruit_SPITFT.h)
+ * @file TFT_SPI.h
  *
- * @section Introduction
+ * @section intro_sec Introduction
  *
  * This file is part AVR_ILI9341 library package files. It is an implementation
  * of the TFT Display using the chipset ILI9341V and been optimised mainly
  * for Leonardo and Mega 2560 boards. It may work with other AVR boards but
  * that cannot be guaranteed.
  *
- *  @section dependencies Dependencies
- *
- * This library depends on <a href="https://github.com/adafruit/Adafruit_GFX">
- * Adafruit_GFX</a> being present on your system. Please make sure you have
- * installed the latest version before using this library.
- *
  * @section author Author
  *
  * Originally written by Limor "ladyada" Fried for Adafruit Industries,
  * with contributions from the open source community.
- * Improved by dmigwi (Daniel Migwi)  @2023
+ * Improved by dmigwi (Daniel Migwi)  @2024
  *
  *  @section license License
  *
@@ -42,22 +36,19 @@
 #define DEFAULT_SPI_FREQ 16000000L  ///< Hardware SPI default speed
 #endif
 
-#define TFT_WIDTH 240     ///< Maximum TFT display hardware width.
-#define TFT_HEIGHT 320    ///< Maximum TFT display hardware height.
-#define TFT_PIXELS 76800  ///< Maximum TFT display pixels. (=240 x 320)
+#define TFT_WIDTH 240   ///< Maximum TFT display hardware width.
+#define TFT_HEIGHT 320  ///< Maximum TFT display hardware height.
 
 // CLASS DEFINITION
 // -----------------------------------------------------------------------------
 
 /*!
   @brief  TFT_SPI is an intermediary class between TFT_GFX and various
-  hardware-specific subclasses for different displays. It handles certain
-  operations that are common to a range of displays (address window, area fills,
-  etc.).
+  hardware-specific subclasses.
 */
 class TFT_SPI : public TFT_GFX {
  public:
-  // CONSTRUCTORS
+  // CONSTRUCTOR
   // ---------------------------------------------------------------------------
 
   /*!
@@ -74,9 +65,6 @@ class TFT_SPI : public TFT_GFX {
   // ---------------------------------------------------------------------------
 
   virtual ~TFT_SPI(){};
-
-  // PUBLIC CLASS MEMBER FUNCTIONS
-  // ---------------------------------------------------------------------------
 
  private:
   // PRIVATE CLASS MEMBER FUNCTIONS

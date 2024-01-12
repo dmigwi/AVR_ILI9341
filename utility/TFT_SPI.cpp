@@ -1,5 +1,5 @@
 /*!
- * @file TFT_SPI.cpp (Originally Adafruit_SPITFT.cpp)
+ * @file TFT_SPI.cpp
  *
  * @section intro_sec Introduction
  *
@@ -8,17 +8,11 @@
  * for Leonardo and Mega 2560 boards. It may work with other AVR boards but
  * that cannot be guaranteed.
  *
- *  @section dependencies Dependencies
- *
- * This library depends on <a href="https://github.com/adafruit/Adafruit_GFX">
- * Adafruit_GFX</a> being present on your system. Please make sure you have
- * installed the latest version before using this library.
- *
  * @section author Author
  *
  * Originally written by Limor "ladyada" Fried for Adafruit Industries,
  * with contributions from the open source community.
- * Improved by dmigwi (Daniel Migwi)  @2023
+ * Improved by dmigwi (Daniel Migwi)  @2024
  *
  *  @section license License
  *
@@ -48,7 +42,7 @@
                 hardware specifications.
 */
 TFT_SPI::TFT_SPI(int8_t cs, int8_t dc, int8_t rst)
-    : TFT_GFX(TFT_WIDTH, TFT_HEIGHT, TFT_PIXELS) {
+    : TFT_GFX(TFT_WIDTH, TFT_HEIGHT) {
   _rst = rst;
   _cs = cs;
   _dc = dc;
@@ -214,11 +208,10 @@ void TFT_SPI::writeImage(uint16_t *img, uint32_t num) {
 // Miscellaneous class member functions that don't draw anything.
 
 /*!
-      @brief  Handles the complete sending of 8-bit commands and data chunks.
+      @brief  Handles the sending of 8-bit commands and data chunks.
               It does not initiate or close the SPI communication session. This
-              should be managed by its' caller. This is done to increase its
-              efficiency on cases when multiple simultaneous calls need to be
-   executed.
+              should be managed by its' caller. It is done to increase its
+              efficiency where data write need to be executed consecutively.
       @param   cmd  The command byte
       @param   dataBytes  A pointer to the Data bytes to send
       @param   numBytes  The number of bytes we should send
@@ -234,11 +227,11 @@ void TFT_SPI::sendCommand(uint8_t cmd, const uint8_t *dataBytes,
 }
 
 /*!
-    @brief   Read 8 bits of data from display configuration memory (not RAM).
+    @brief   Reads 8 bits of data from display configuration memory (not RAM).
             It does not initiate or close the SPI communication session. This
-            should be managed by its' caller. This is done to increase its
-            efficiency on cases when multiple simultaneous calls need to be
-   executed. This is highly undocumented/supported and should be avoided,
+            should be managed by its' caller. It is done to increase its
+            efficiency where data write need to be executed consecutively.
+            This is highly undocumented/supported and should be avoided,
             function is only included because some of the examples use it. Uses
             NOP (0x00) instruction to read command output.
     @param   commandByte The command register to read data from.

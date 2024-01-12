@@ -12,7 +12,7 @@
  *
  * Originally written by Limor "ladyada" Fried for Adafruit Industries,
  * with contributions from the open source community.
- * Improved by dmigwi (Daniel Migwi)  @2023
+ * Improved by dmigwi (Daniel Migwi)  @2024
  *
  *  @section license License
  *
@@ -31,7 +31,7 @@ enum segment { Top, Bottom };
 
 class TFT_GFX {
  public:
-  TFT_GFX(uint16_t w, uint16_t h, uint32_t pixels);  // Constructor
+  TFT_GFX(uint16_t w, uint16_t h);  // Constructor
 
   ~TFT_GFX();  // Destructor
 
@@ -47,7 +47,6 @@ class TFT_GFX {
 
  protected:
   uint16_t _width, _height;
-  uint32_t _pixels;
   uint8_t rotation;
 
  private:

@@ -1,24 +1,18 @@
 /*!
- * @file AVR_ILI9341.cpp (Originally Adafruit_ILI9341.cpp)
+ * @file AVR_ILI9341.cpp
  *
- * @section Introduction
+ * @section intro_sec Introduction
  *
  * This file is part AVR_ILI9341 library package files. It is an implementation
  * of the TFT Display using the chipset ILI9341V and been optimised mainly
  * for Leonardo and Mega 2560 boards. It may work with other AVR boards but
  * that cannot be guaranteed.
  *
- *  @section dependencies Dependencies
- *
- * This library depends on <a href="https://github.com/adafruit/Adafruit_GFX">
- * Adafruit_GFX</a> being present on your system. Please make sure you have
- * installed the latest version before using this library.
- *
  * @section author Author
  *
  * Originally written by Limor "ladyada" Fried for Adafruit Industries,
  * with contributions from the open source community.
- * Improved by dmigwi (Daniel Migwi) @2023
+ * Improved by dmigwi (Daniel Migwi)  @2024
  *
  *  @section license License
  *
@@ -71,8 +65,8 @@ static const uint8_t PROGMEM initcmd[] = {
 // clang-format on
 
 /*!
-    @brief   Initialize ILI9341 chip
-    Connects to the ILI9341 over SPI and sends initialization procedure commands
+    @brief   Initialize ILI9341 chip. Connects to the ILI9341 over SPI
+                and sends initialization procedure commands
     @param    freq  Desired SPI clock frequency
 */
 void AVR_ILI9341::begin(uint32_t freq) {
