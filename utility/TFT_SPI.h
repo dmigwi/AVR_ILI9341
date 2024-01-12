@@ -78,8 +78,9 @@ class TFT_SPI : public TFT_GFX {
   // PUBLIC CLASS MEMBER FUNCTIONS
   // ---------------------------------------------------------------------------
 
-  void drawScreen(uint16_t xAxis, int16_t yAxis, uint16_t width,
-                  uint16_t height, uint16_t *pcolors);
+  // void drawScreen(uint16_t xAxis, uint16_t yAxis, uint16_t width,
+  //                 uint16_t height, uint16_t startFillPos);
+
  private:
   // PRIVATE CLASS MEMBER FUNCTIONS
   // ---------------------------------------------------------------------------
@@ -87,12 +88,6 @@ class TFT_SPI : public TFT_GFX {
   uint8_t writeSPI(uint8_t c);
 
  protected:
-  /*!
-      @brief  Display-specific initialization function.
-      @param  freq  SPI frequency, in hz (or 0 for default or unused).
-  */
-  virtual void begin(uint32_t freq) = 0;
-
   /*!
       @brief  Sets up the specific display hardware's "address window"
               for subsequent pixel-pushing operations.
@@ -112,13 +107,13 @@ class TFT_SPI : public TFT_GFX {
   void writeData16(uint16_t color,
                    uint32_t len);  // Writes 16 bit for provided counts.
 
-  void writeImage(uint8_t *img, uint16_t num);  // Writes image efficiently
+  void writeImage(uint16_t *img, uint32_t num);  // Writes image efficiently
 
   void initSPI(uint32_t freq = 0, uint8_t spiMode = SPI_MODE0);
   void sendCommand(uint8_t cmd, const uint8_t *dataBytes, uint8_t numBytes);
   uint8_t readcommand8(uint8_t commandByte, uint8_t index);
 
-  void setScreenData(uint16_t startPos, uint16_t color, uint16_t len);
+  // void setScreenData(uint16_t startPos, uint16_t color, uint16_t num);
 
   void SPI_START();
   void SPI_END();
@@ -145,10 +140,10 @@ class TFT_SPI : public TFT_GFX {
   int8_t _cs;   ///< Chip select pin # (or -1)
   int8_t _dc;   ///< Data/command pin #
 
-  static uint16_t WIDTH;
-  static uint16_t HEIGHT;
-
-  uint16_t screenData[TFT_PIXELS];
+  uint16_t WIDTH;
+  uint16_t HEIGHT;
+// 
+  // uint16_t screenData[TFT_PIXELS];
 };
 
 #endif  // end _TFT_SPI_H_

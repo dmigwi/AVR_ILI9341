@@ -194,52 +194,61 @@ void TFT_SPI::writeData16(uint16_t color, uint32_t num) {
 
 /*!
     @brief Similar to writeData16() but is optimised for pointers.
-    @param  img  8-bit pixel color location pointer.
+    @param  img  16-bit pixel color location pointer.
     @param  num   Number of pixels to draw.
     @note This is a fast method to send multiple 16-bit values from RAM via SPI
 */
-void TFT_SPI::writeImage(uint8_t *img, uint16_t num) {
+void TFT_SPI::writeImage(uint16_t *img, uint32_t num) {
   digitalWrite(_dc, HIGH);
+  uint16_t color;
 
   while (num > 0) {
-    writeSPI(*(img + 1));
-    writeSPI(*(img + 0));
-    img += 2;
+    color = *img;
+    writeSPI(color >> 8);
+    writeSPI(color);
     num--;
   }
 }
 
-/*!
-    @brief  Draw a 16-bit color pixels (565 RGB) start from the at the
-            specified (x,y) position till the end of the array
-            For 16-bit display devices; no color reduction performed.
-    @param  xAxis    Top left corner horizontal coordinate.
-    @param  yAxis    Top left corner vertical coordinate.
-    @param  pcolors  Pointer to 16-bit array of pixel values.
-    @param  width    Width of bitmap in pixels.
-    @param  height   Height of bitmap in pixels.
-*/
-void TFT_SPI::drawScreen(uint16_t xAxis, int16_t yAxis, uint16_t width,
-                         uint16_t height, uint16_t *pcolors) {
-  if (xAxis >= _width || yAxis >= _height || width > _width || height > _height)
-    return;
-  setAddressWindow(xAxis, yAxis, (xAxis + width - 1), (yAxis + height - 1));
+// /**
+//  * @brief  Draws 16-bit display color pixels (565 RGB) in the screenData array
+//  *from the start position specified (xAxis,yAxis) position till the length
+//  *specified.
+//  * @param  xAxis    x axis value used to move the shape into the position.
+//  * @param  yAxis    y axis value used to move the shape into the position.
+//  * @param  width    Width of display that will have its pixels updated.
+//  * @param  height   Height of display that will have its pixels updated.
+//  * @param  startFillPos  screenData index array from where pixels will be
+//  *editted.
+//  * @note All parameters take up default values of zero. If width and height
+//  *parameters have zero values, they are assigned the max display
+//  *width and height measurements indicating that the whole screen should be
+//  *redrawn.
+//  */
+// void TFT_SPI::drawScreen(uint16_t xAxis, uint16_t yAxis, uint16_t width,
+//                          uint16_t height, uint16_t startFillPos) {
+//   if (width == 0) width = _width;     // Max display width is assigned.
+//   if (height == 0) height = _height;  // Max display height is assigned.
 
-  writeImage((uint8_t *)pcolors, width * height);
+//   if (xAxis >= _width || yAxis >= _height || width > _width || height > _height)
+//     return;
+//   setAddressWindow(xAxis, yAxis, (xAxis + width - 1), (yAxis + height - 1));
 
-  SPI_END();
-}
+//   writeImage(&screenData[startFillPos], width * height);
 
-/***
- * @brief Makes updates on the screen display data array.
- * @param startPos An array index from which pixels to be displayed are held
- * till the need to display the data arises.
- * @param color the color pixel to update from the specified array locations.
- * @param len count of pixels to be affected by the current color changes.
- */
-void TFT_SPI::setScreenData(uint16_t startPos, uint16_t color, uint16_t len) {
-  memset(&screenData[startPos], color, len);
-}
+//   SPI_END();
+// }
+
+// /***
+//  * @brief Makes updates on the screen display data array.
+//  * @param startPos An array index from which pixels to be displayed are held
+//  * till the need to display the data arises.
+//  * @param color the color pixel to update from the specified array locations.
+//  * @param num count of pixels to be affected by the current color changes.
+//  */
+// void TFT_SPI::setScreenData(uint16_t startPos, uint16_t color, uint16_t num) {
+//   memset(&screenData[startPos], color, num);
+// }
 
 // -------------------------------------------------------------------------
 // Miscellaneous class member functions that don't draw anything.

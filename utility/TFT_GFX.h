@@ -19,28 +19,46 @@
  * BSD license, all text here must be included in any redistribution.
  */
 
+#ifndef _TFT_GFX_H_
+#define _TFT_GFX_H_
+
 #include "Arduino.h"
-#include "TFT_SPI.h"
+
+/**
+ * @brief Defines a circle's subdivision into Top and Bottom hemispheres.
+ */
+enum segment { Top, Bottom };
+
+// enum line { Horizontal, Vertical };
 
 class TFT_GFX {
  public:
-  TFT_GFX(uint16_t w, uint16_t h, uint16_t pixels);  // Constructor
+  TFT_GFX(uint16_t w, uint16_t h, uint32_t pixels);  // Constructor
 
   ~TFT_GFX();  // Destructor
+
+  virtual void writeData16(uint16_t color, uint32_t num) = 0;
+  virtual void setAddressWindow(uint16_t x, uint16_t y, uint16_t w,
+                                uint16_t h) = 0;
 
   void fillScreen(uint16_t color);
 
   void drawShape(uint16_t xAxis, uint16_t yAxis, uint16_t length,
-                 uint16_t breadth, uint16_t radius, uint8_t strokeWidth,
+                 uint16_t breadth, uint16_t radius, uint8_t strokePixels,
                  uint16_t strokeColor, uint16_t fillColor);
 
  protected:
-  uint16_t _width, _height, _pixels;
+  uint16_t _width, _height;
+  uint32_t _pixels;
   uint8_t rotation;
 
  private:
-  void plotOctets(uint16_t xAxis, uint16_t yAxis, uint16_t xFill,
-                  uint16_t yFill, uint16_t length, uint16_t breadth,
-                  uint16_t color);
- virtual void setScreenData(uint16_t startPos, uint16_t color, uint16_t len);
+  uint16_t circleAlgo(uint16_t y, uint16_t radius);
+  void plotOctets(segment hemisphere, uint16_t xCenter, uint16_t yCenter,
+                  uint16_t xOutline, uint16_t yOutline, uint16_t length,
+                  uint16_t fillColor, uint8_t strokePx, uint16_t strokeColor);
+  void setScreenData(uint16_t xPos, uint16_t yPos, uint16_t _xFillPx,
+                     uint8_t _depth, uint16_t _fillcolor,
+                     uint8_t _strokePx, uint16_t _strokeColor);
 };
+#endif  // end _TFT_GFX_H_

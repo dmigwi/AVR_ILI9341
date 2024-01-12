@@ -33,7 +33,7 @@
 #include <SPI.h>
 // #include <Adafruit_I2CDevice.h>
 // #include <Adafruit_SPIDevice.h>
-#include "utility/TFT_GFX.h"
+// #include "utility/TFT_GFX.h"
 #include "utility/TFT_SPI.h"
 
 #define ILI9341_NOP 0x00     ///< No-op register
@@ -160,6 +160,11 @@ public:
   void scrollTo(uint16_t y);
   void setScrollMargins(uint16_t top, uint16_t bottom);
   uint8_t readcommand(uint8_t reg, uint8_t index = 0);
+
+  // using TFT_SPI::drawScreen;
+  // void drawScreen(uint16_t xAxis = 0, int16_t yAxis = 0,
+  //                        uint16_t width = 0, uint16_t height = 0,
+  //                        uint16_t startFillPos = 0);
 
 private:
   // Transaction API not used by GFX

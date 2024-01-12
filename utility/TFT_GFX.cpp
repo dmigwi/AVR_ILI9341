@@ -21,7 +21,7 @@
 
 #include "TFT_GFX.h"
 
-TFT_GFX::TFT_GFX(uint16_t w, uint16_t h, uint16_t pixels) {
+TFT_GFX::TFT_GFX(uint16_t w, uint16_t h, uint32_t pixels) {
   _width = w;   // Value adjusted on Rotation.
   _height = h;  // Value adjusted on Rotation.
   _pixels = pixels;
@@ -35,7 +35,7 @@ TFT_GFX::~TFT_GFX() {}
  * @param color color pixels to display for the whole viewable area.
  */
 void TFT_GFX::fillScreen(uint16_t color) {
-  TFT_GFX::setScreenData(0, color, _pixels);
+  setScreenData(0, 0, _width, _height, color, 0, 0);
 }
 
 /**
@@ -126,34 +126,20 @@ void TFT_GFX::drawShape(uint16_t xAxis, uint16_t yAxis, uint16_t length,
   // Pixel out of bounds
   if (xAxis > _width || yAxis > _height) isDrawPixel = false;
 
-  volatile uint16_t xFill, xStroke;
+  uint16_t roundRectLength = length;
+  uint16_t roundedRectBreadth = breadth;
+  volatile uint16_t xFill, xStroke, xFillCounts;
 
-  // Draw a circle if the required valid parameters were found.
-  if (isDrawCircle) {
-    int y = 0;
-    while (y <= xFill) {  // True only till the first octet is plotted.
-      y++;
-
-      // Compute and plot the x strokePixels value if supported.
-      if (strokeWidth > 0) {
-        xStroke = circleAlgo(y, radius + strokeWidth);
-        plotOctets(xAxis, yAxis, xStroke, y, length - diameter,
-                   breadth - diameter, strokeColor);
-      }
-
-      // Compute and plot the x fillPixels value.
-      xFill = circleAlgo(y, radius);
-      plotOctets(xAxis, yAxis, xFill, y, length - diameter, breadth - diameter,
-                 fillColor);
-    }
-  }
-
-  volatile uint16_t startFillPos, xFillCounts;
+  // Set drawing rectangle/rounded-rectangle config if the required valid
+  // parameters were found.
   if (isDrawRect) {
+    roundRectLength -= diameter;
+    roundedRectBreadth -= diameter;
     xFill = length;                    // Pixels per x axis row to fill at ago.
-    xFillCounts = breadth - diameter;  // Turns to fill pixels per x axis row.
+    xFillCounts = roundedRectBreadth;  // Turns to fill pixels per x axis row.
   }
 
+  // Set drawing line config if the required valid parameters were found.
   if (isDrawLine) {
     if (breadth == 0) {  //< Drawing a horizontal line.
       xFill = length;
@@ -165,30 +151,62 @@ void TFT_GFX::drawShape(uint16_t xAxis, uint16_t yAxis, uint16_t length,
     radius = 0;  // Disable the radius if it was preset.
   }
 
+  // Set drawing single pixel config if the required valid parameters were
+  // found.
   if (isDrawPixel) {
     xFill = 1;        // Pixels per x axis row to fill at ago.
     xFillCounts = 1;  // Turns to fill pixels per x axis row.
     radius = 0;       // Disable the radius if it was preset.
   }
 
-  while (xFillCounts > 0) {
-    startFillPos = _width * (xAxis - xFill - radius) + xFill + 1;
-    TFT_GFX::setScreenData(startFillPos, fillColor, xFill);
-    xFillCounts--;
+  uint8_t strokePx = strokeWidth;
+  uint16_t xCenter = xAxis + radius;
+  uint16_t yCenter = yAxis + radius;
+
+  // Draw pixels for the top hemisphere.
+  for (uint16_t y = 0; y <= xFill && radius > 0; y++) {
+    // Compute the x strokePixels value if supported.
+    if (strokeWidth > 0) xStroke = circleAlgo(y, radius + strokeWidth);
+
+    // Compute the x fillPixels value.
+    xFill = circleAlgo(y, radius);
+    if (strokeWidth > 0) strokePx = xStroke - xFill;
+    plotOctets(Top, xCenter, yCenter, xFill, y, roundRectLength, fillColor,
+               strokePx, strokeColor);
+  }
+
+  // Draw pixels for the Mid section (rectangle, pixel or line) if enabled.
+  if (isDrawRect || isDrawLine || isDrawPixel) {
+    setScreenData(xAxis, yAxis + radius, xFill, xFillCounts, fillColor,
+                  strokePx, strokeColor);
+  }
+
+  // Draw pixels for the Bottom hemisphere.
+  for (uint16_t y = 0; y <= xFill && radius > 0; y++) {
+    // Compute the x strokePixels value if supported.
+    if (strokeWidth > 0) xStroke = circleAlgo(y, radius + strokeWidth);
+
+    // Compute the x fillPixels value.
+    xFill = circleAlgo(y, radius);
+    if (strokeWidth > 0) strokePx = xStroke - xFill;
+    plotOctets(Bottom, xCenter, yCenter, xFill, y, roundRectLength, fillColor,
+               strokePx, strokeColor);
   }
 }
 
 /**
- * @brief Plots the all circle's symmetrical octets's fill and outline pixels in
- * the displayData array using coordinates for the single octets calculated
- * (xFill, yFill).
- * @param xAxis x value for moving the shape into the required position.
- * @param yAxis y value for moving the shape into the required position
- * @param xFill x coordinates for the circle outline.
- * @param yFill y coordinates for the circle outline.
+ * @brief Plots the all circle's symmetrical octets's fill and outline pixels
+ * using coordinates for the single octets computed (xOutline, yOutline).
+ * @param hemisphere defines either the top or bottom hemisphere
+ * @param xCenter x axis value for the center of the circle
+ * @param yCenter y axis value for the center of the circle
+ * @param xOutline x axis coordinate for the computed circle outline.
+ * @param yOutline y axis coordinate for the computed circle outline.
  * @param length length of the rounded-rectangle (= Original L - 2 * Radius).
- * @param breadth width of the rounded-rectangle. (= Original W - 2 * Radius).
- * @param color color pixel used to display the circle fill or outline.
+ * @param fillColor color pixel used to display the circle fill.
+ * @param strokePx number of pixel used to display the circle outline. (if
+ * provided)
+ * @param strokeColor color pixel used to display the outline.(if provided)
  *
  * @note The Sketch below shows how the various octets are numbered.
  * @note ****`3 <----> 2`****
@@ -196,30 +214,48 @@ void TFT_GFX::drawShape(uint16_t xAxis, uint16_t yAxis, uint16_t length,
  * @note *`5 <---------> 8`*
  * @note ****`6 <----> 7`***
  */
-void TFT_GFX::plotOctets(uint16_t xAxis, uint16_t yAxis, uint16_t xFill,
-                         uint16_t yFill, uint16_t length, uint16_t breadth,
-                         uint16_t color) {
-  volatile uint16_t startFillPos, xFillPixels;
+void TFT_GFX::plotOctets(segment hemisphere, uint16_t xCenter, uint16_t yCenter,
+                         uint16_t xOutline, uint16_t yOutline, uint16_t length,
+                         uint16_t fillColor, uint8_t strokePx,
+                         uint16_t strokeColor) {
+  volatile uint16_t xPos, yPos, xFillPixels;
 
-  // Plot Octet 3 <----> 2
-  xFillPixels = 2 * yFill + length;
-  startFillPos = _width * (xAxis - xFill) + xFill + 1;
-  TFT_GFX::setScreenData(startFillPos, color, xFillPixels);
+  // xCenter += strokePx;
+  // yCenter += strokePx;
 
-  // Plot Octet 4 <----> 1
-  xFillPixels = 2 * xFill + length;
-  startFillPos = _width * (yAxis - yFill) + yFill + 1;
-  TFT_GFX::setScreenData(startFillPos, color, xFillPixels);
+  switch (hemisphere) {
+    case Top:  // Top Hemisphere.
+      // Plot Octet 3 <----> 2
+      xPos = xCenter - xOutline;
+      yPos = yCenter + yOutline;
+      xFillPixels = 2 * xOutline + length;
+      setScreenData(xPos, yPos, xFillPixels, 1, fillColor, strokePx,
+                    strokeColor);
 
-  // Plot Octet 5 <----> 8
-  xFillPixels = 2 * xFill + length;
-  startFillPos = _width * (yAxis + yFill + breadth) + yFill + 1;
-  TFT_GFX::setScreenData(startFillPos, color, xFillPixels);
+      // Plot Octet 4 <----> 1
+      xPos = xCenter - yOutline;
+      yPos = yCenter + xOutline;
+      xFillPixels = 2 * yOutline + length;
+      setScreenData(xPos, yPos, xFillPixels, 1, fillColor, strokePx,
+                    strokeColor);
+      break;
 
-  // Plot Octet 6 <----> 7
-  xFillPixels = 2 * yFill + length;
-  startFillPos = _width * (xAxis + xFill + breadth) + xFill + 1;
-  TFT_GFX::setScreenData(startFillPos, color, xFillPixels);
+    default:  // Bottom Hemisphere.
+              // Plot Octet 5 <----> 8
+      xPos = xCenter - yOutline;
+      yPos = yCenter - xOutline;
+      xFillPixels = 2 * yOutline + length;
+      setScreenData(xPos, yPos, xFillPixels, 1, fillColor, strokePx,
+                    strokeColor);
+
+      // Plot Octet 6 <----> 7
+      xPos = xCenter - xOutline;
+      yPos = yCenter - yOutline;
+      xFillPixels = 2 * xOutline + length;
+      setScreenData(xPos, yPos, xFillPixels, 1, fillColor, strokePx,
+                    strokeColor);
+      break;
+  }
 }
 
 /**
@@ -233,7 +269,47 @@ void TFT_GFX::plotOctets(uint16_t xAxis, uint16_t yAxis, uint16_t xFill,
  *       Circle equation used is defined here:
  * https://groups.csail.mit.edu/graphics/classes/6.837/F98/Lecture6/circle.html
  */
-inline uint16_t circleAlgo(uint16_t y, uint16_t radius) {
+inline uint16_t TFT_GFX::circleAlgo(uint16_t y, uint16_t radius) {
   volatile float result = (float)((radius * radius) - (y * y));
-  return (uint16_t)sqrt(result);
+  return (uint16_t)round(sqrt(result));
+}
+
+/**
+ * @brief Writes the fill color and the stroke color (if provided) values to the
+ * display registers.
+ * @param xPos defines the x coordinate value from the display grid where
+ * drawing area starts.
+ * @param yPos defines the y coordinate value from the display grid where
+ * drawing area starts.
+ * @param _xFillPx defines the number of pixels along the x axis to filled with
+ * the `_fillColor`.
+ * @param _depth defines the number of rows (along y axis) where the `_xFillPx`
+ * pixels will be editted.
+ * @param _fillcolor is the fill color of the shape.
+ * @param _strokePx is the number of pixels along x axis that will show the
+ * shape outline.
+ * @param _strokeColor is the color to display shape outline.
+ *
+ * @note The stroke feature should be used when drawing on line at ago. Using it
+ * will fillScreen or similar command could result to unexpected results.
+ * @note `Display start column` = xPos;
+ * @note `Display end column` = _xFillPx + xPos + (_strokePx * 2);
+ * @note `Display start page` = yPos;
+ * @note `Display end page` = _depth + yPos;
+ */
+void TFT_GFX::setScreenData(uint16_t xPos, uint16_t yPos, uint16_t _xFillPx,
+                            uint8_t _depth, uint16_t _fillcolor,
+                            uint8_t _strokePx, uint16_t _strokeColor) {
+  // Set the drawing area.
+  setAddressWindow(xPos, yPos, _xFillPx + xPos + (_strokePx * 2),
+                   _depth + yPos);
+
+  // Write stroke color data to the registers
+  if (_strokePx > 0) writeData16(_strokeColor, _strokePx * _depth);
+
+  // Write fill color data to the registers
+  if (_xFillPx > 0) writeData16(_fillcolor, _xFillPx * _depth);
+
+  // Write stroke color data to the registers
+  if (_strokePx > 0) writeData16(_strokeColor, _strokePx * _depth);
 }
