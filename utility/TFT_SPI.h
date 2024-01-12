@@ -1,24 +1,18 @@
 /*!
- * @file TFT_SPI.h (Originally Adafruit_SPITFT.h)
+ * @file TFT_SPI.h
  *
- * @section Introduction
+ * @section intro_sec Introduction
  *
  * This file is part AVR_ILI9341 library package files. It is an implementation
  * of the TFT Display using the chipset ILI9341V and been optimised mainly
  * for Leonardo and Mega 2560 boards. It may work with other AVR boards but
  * that cannot be guaranteed.
  *
- *  @section dependencies Dependencies
- *
- * This library depends on <a href="https://github.com/adafruit/Adafruit_GFX">
- * Adafruit_GFX</a> being present on your system. Please make sure you have
- * installed the latest version before using this library.
- *
  * @section author Author
  *
  * Originally written by Limor "ladyada" Fried for Adafruit Industries,
  * with contributions from the open source community.
- * Improved by dmigwi (Daniel Migwi)  @2023
+ * Improved by dmigwi (Daniel Migwi)  @2024
  *
  *  @section license License
  *
@@ -31,7 +25,7 @@
 #include <Print.h>
 #include <SPI.h>
 
-#include "Adafruit_GFX.h"
+#include "TFT_GFX.h"
 
 // HARDWARE CONFIG
 // -----------------------------------------------------------------------------
@@ -42,62 +36,35 @@
 #define DEFAULT_SPI_FREQ 16000000L  ///< Hardware SPI default speed
 #endif
 
+#define TFT_WIDTH 240   ///< Maximum TFT display hardware width.
+#define TFT_HEIGHT 320  ///< Maximum TFT display hardware height.
+
 // CLASS DEFINITION
 // -----------------------------------------------------------------------------
 
 /*!
-  @brief  TFT_SPI is an intermediary class between Adafruit_GFX
-          and various hardware-specific subclasses for different displays.
-          It handles certain operations that are common to a range of
-          displays (address window, area fills, etc.).
+  @brief  TFT_SPI is an intermediary class between TFT_GFX and various
+  hardware-specific subclasses.
 */
-class TFT_SPI : public Adafruit_GFX {
+class TFT_SPI : public TFT_GFX {
  public:
-  // CONSTRUCTORS
+  // CONSTRUCTOR
   // ---------------------------------------------------------------------------
 
   /*!
         @brief Hardware SPI constructor uses the default SPI pin. The default
                 MOSI, MISO and SPI pins are used according to the AVR board's
                 specification in it variant "pins_arduino.h" file.
-        @param width defines the width of the display according to its
-                hardware specifications.
-        @param height defines the height of the display according to its
-                hardware specifications.
         @param cs defines the chipset pin.
         @param dc defines the Data/Command select pin.
         @param rst defines the reset pin of the display.
   */
-  TFT_SPI(uint16_t width, uint16_t height, int8_t cs, int8_t dc, int8_t rst);
+  TFT_SPI(int8_t cs, int8_t dc, int8_t rst);
 
   // DESTRUCTOR
   // ---------------------------------------------------------------------------
 
   virtual ~TFT_SPI(){};
-
-  /*!
-        @brief Defines the various types of straight line primitives supported.
-  */
-  enum lineType { Horizontal, Vertical };
-
-  // PUBLIC CLASS MEMBER FUNCTIONS
-  // ---------------------------------------------------------------------------
-
-  // --drawPixel and drawline primitive function might be replaced with better
-  // more efficient graphics display management primitives.--
-  void drawPixel(int16_t x, int16_t y, uint16_t color);
-  void drawLine(int16_t x, int16_t y, int16_t w, lineType line, uint16_t color);
-
-  void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
-  void drawImage(int16_t x, int16_t y, uint16_t *pcolors, int16_t w, int16_t h);
-
-  void writeData(uint8_t data);    // Write single byte as DATA
-  void writeCommand(uint8_t cmd);  // Write single byte as Command
-  void writeData16(uint16_t color,
-                   uint32_t len);  // Writes 16 bit for provided counts.
-
-  void writeImage(uint8_t *img, uint16_t num);  // Writes image efficiently
-  uint16_t color565(uint8_t red, uint8_t green, uint8_t blue);
 
  private:
   // PRIVATE CLASS MEMBER FUNCTIONS
@@ -106,12 +73,6 @@ class TFT_SPI : public Adafruit_GFX {
   uint8_t writeSPI(uint8_t c);
 
  protected:
-  /*!
-      @brief  Display-specific initialization function.
-      @param  freq  SPI frequency, in hz (or 0 for default or unused).
-  */
-  virtual void begin(uint32_t freq) = 0;
-
   /*!
       @brief  Sets up the specific display hardware's "address window"
               for subsequent pixel-pushing operations.
@@ -126,6 +87,12 @@ class TFT_SPI : public Adafruit_GFX {
   */
   virtual void setAddressWindow(uint16_t x, uint16_t y, uint16_t w,
                                 uint16_t h) = 0;
+  void writeData(uint8_t data);    // Write single byte as DATA
+  void writeCommand(uint8_t cmd);  // Write single byte as Command
+  void writeData16(uint16_t color,
+                   uint32_t len);  // Writes 16 bit for provided counts.
+
+  void writeImage(uint16_t *img, uint32_t num);  // Writes image efficiently
 
   void initSPI(uint32_t freq = 0, uint8_t spiMode = SPI_MODE0);
   void sendCommand(uint8_t cmd, const uint8_t *dataBytes, uint8_t numBytes);
@@ -152,10 +119,12 @@ class TFT_SPI : public Adafruit_GFX {
   };  ///< Only one interface is active
 #endif
 
-  uint8_t connection;  ///< TFT_HARD_SPI, TFT_SOFT_SPI, etc.
-  int8_t _rst;         ///< Reset pin # (or -1)
-  int8_t _cs;          ///< Chip select pin # (or -1)
-  int8_t _dc;          ///< Data/command pin #
+  int8_t _rst;  ///< Reset pin # (or -1)
+  int8_t _cs;   ///< Chip select pin # (or -1)
+  int8_t _dc;   ///< Data/command pin #
+
+  uint16_t WIDTH;
+  uint16_t HEIGHT;
 };
 
 #endif  // end _TFT_SPI_H_
