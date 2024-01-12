@@ -211,9 +211,9 @@ void TFT_SPI::writeImage(uint16_t *img, uint32_t num) {
 }
 
 // /**
-//  * @brief  Draws 16-bit display color pixels (565 RGB) in the screenData array
-//  *from the start position specified (xAxis,yAxis) position till the length
-//  *specified.
+//  * @brief  Draws 16-bit display color pixels (565 RGB) in the screenData
+//  array *from the start position specified (xAxis,yAxis) position till the
+//  length *specified.
 //  * @param  xAxis    x axis value used to move the shape into the position.
 //  * @param  yAxis    y axis value used to move the shape into the position.
 //  * @param  width    Width of display that will have its pixels updated.
@@ -230,7 +230,8 @@ void TFT_SPI::writeImage(uint16_t *img, uint32_t num) {
 //   if (width == 0) width = _width;     // Max display width is assigned.
 //   if (height == 0) height = _height;  // Max display height is assigned.
 
-//   if (xAxis >= _width || yAxis >= _height || width > _width || height > _height)
+//   if (xAxis >= _width || yAxis >= _height || width > _width || height >
+//   _height)
 //     return;
 //   setAddressWindow(xAxis, yAxis, (xAxis + width - 1), (yAxis + height - 1));
 
@@ -246,7 +247,8 @@ void TFT_SPI::writeImage(uint16_t *img, uint32_t num) {
 //  * @param color the color pixel to update from the specified array locations.
 //  * @param num count of pixels to be affected by the current color changes.
 //  */
-// void TFT_SPI::setScreenData(uint16_t startPos, uint16_t color, uint16_t num) {
+// void TFT_SPI::setScreenData(uint16_t startPos, uint16_t color, uint16_t num)
+// {
 //   memset(&screenData[startPos], color, num);
 // }
 

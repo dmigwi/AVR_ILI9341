@@ -142,7 +142,7 @@ class TFT_SPI : public TFT_GFX {
 
   uint16_t WIDTH;
   uint16_t HEIGHT;
-// 
+
   // uint16_t screenData[TFT_PIXELS];
 };
 
