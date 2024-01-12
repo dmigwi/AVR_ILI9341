@@ -188,6 +188,24 @@ void TFT_GFX::drawShape(uint16_t xAxis, uint16_t yAxis, uint16_t length,
   // Draw pixels for the Mid section (rectangle, pixel or line) if enabled.
   if (isDrawRect || isDrawLine || isDrawPixel) {
     setScreenData(xAxis, yAxis + radius, xFill, xFillCounts, fillColor);
+
+    if (strokeWidth > 0) {
+      // The rounded-rectangle only requires only two of sides stroked otherwise
+      // stroke all the four sides.
+      setScreenData(xAxis - strokeWidth - 1, yAxis + radius, strokeWidth,
+                    xFillCounts, strokeColor);
+      setScreenData(xAxis + length + 1, yAxis + radius, strokeWidth,
+                    xFillCounts, strokeColor);
+
+      if (!isDrawCircle) {
+        uint16_t startPos = xAxis + radius - strokeWidth;
+        uint16_t strokeLen = length + strokeWidth + strokeWidth;
+        // No rounded rectangle
+        setScreenData(startPos, yAxis, strokeLen, strokeWidth, strokeColor);
+        setScreenData(startPos - 1, yAxis + breadth, strokeLen + 1, strokeWidth,
+                      strokeColor);
+      }
+    }
   }
 
   yPoint = 0;  // Reset yPoint;
